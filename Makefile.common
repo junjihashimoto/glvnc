@@ -1,0 +1,111 @@
+#export WIN32 := 1
+#export MINGW32 := 1
+#export PREFIX:=i586-mingw32msvc-
+#export DEBUG := 1
+
+export PREFIX:=
+
+OS=$(shell uname -o)
+ifeq ($(OS),GNU/Linux)
+ifdef WIN32
+export PREFIX:=i586-mingw32msvc-
+export MINGW32:=1
+endif
+endif
+
+ifeq ($(OS),Msys)
+export WIN32:=1
+export MINGW32:= 1
+endif
+
+ifeq ($(OS),Cygwin)
+export WIN32:=1
+export CYGWIN:=1
+export MINGW32:= 1
+endif
+
+
+WARN_OPT= \
+-Wall \
+-W \
+-Wno-unused-parameter \
+-Wno-sign-compare \
+-Wformat=2 \
+-Wdisabled-optimization \
+-Wfloat-equal \
+-Wpointer-arith \
+-Wdeclaration-after-statement \
+-Wbad-function-cast \
+-Wcast-align \
+-Wredundant-decls \
+-Winline
+
+WARN_OPT2=\
+-Wall \
+-W \
+-Wformat=2 \
+-Wcast-qual \
+-Wcast-align \
+-Wwrite-strings \
+-Wfloat-equal \
+-Wpointer-arith
+
+
+#INCLUDEDIR= -I../bmp -I../libpng -I../libjpeg -I../zlib -I../freegetopt
+
+
+ifdef WIN32
+FLAGS:= $(WARN_OPT2)
+else
+FLAGS:= $(WARN_OPT2) 
+#FLAGS:= $(WARN_OPT2) -fstack-protector 
+#FLAGS:= $(WARN_OPT2) -rdynamic -flto
+#FLAGS:= $(WARN_OPT2)  -rdynamic
+#FLAGS:= $(WARN_OPT2) -rdynamic -pg
+endif
+
+
+LIBS:=\
+../libs/thread/libthread.a \
+../libs/utils/libutils.a 
+
+ifdef WIN32
+
+ifdef CYGWIN
+FLAGS:= -mno-cygwin $(FLAGS)
+else
+FLAGS:= $(FLAGS)
+endif
+
+EXE:=.exe
+
+else
+
+EXE:=
+
+endif
+
+
+ifdef DEBUG
+CFLAGS:= -g $(FLAGS)
+else
+
+ifdef WIN32
+CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -msse2
+#CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -mavx -march=native
+else
+#CFLAGS:= -g $(FLAGS)
+#CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize -mmmx -msse3 -mssse3 -msse4.1 -msse4.2
+#CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -msse4.2 -march=native -fopenmp
+CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -mavx -march=native -fopenmp
+endif
+
+endif
+
+
+CC:=$(PREFIX)gcc
+CXX:=$(PREFIX)g++
+FC:=$(PREFIX)gfortran
+AR:=$(PREFIX)ar
+RANLIB:=$(PREFIX)ranlib
+STRIP:=$(PREFIX)strip

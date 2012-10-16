@@ -22,14 +22,17 @@ public:
   unsigned int sizeY; //縦
   unsigned char *data;  //画像データ格納
   GLuint texture;
+  int    texturep;
   string filename;
   Texture():data(NULL){
     data=NULL;
+    texturep=0;
   }
   Texture(const Texture& tex):data(NULL){
     sizeX=tex.sizeX;
     sizeY=tex.sizeY;
     texture=tex.texture;
+    texturep=1;
     filename=tex.filename;
     data=(unsigned char*)malloc(sizeX*sizeY*3);
     memcpy(data,tex.data,sizeX*sizeY*3);
@@ -57,6 +60,7 @@ public:
     //    sizeX=sizeX%4 == 0 ? sizeX : (4-(sizeX%4))+sizeX;
     int align=(sizeX*3)%4==0? 0 : 4-((sizeX*3)%4);
 
+    
     if(data==NULL){
       data=NULL;
       data=(unsigned char*)malloc(sizeof(unsigned char)*(sizeX+align)*bmp.h*3);
@@ -68,7 +72,10 @@ public:
 	data[x*3+y*(3*(sizeX)+align)+z]=bmp(x,y,z);
     }
     //    glEnable( GL_TEXTURE_RECTANGLE_ARB );
-    glGenTextures( 1, &texture );
+    if(!texturep){
+      glGenTextures( 1, &texture );
+      texturep=1;
+    }
     glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texture );
     //  glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -106,6 +113,7 @@ public:
     sizeX=tex.sizeX;
     sizeY=tex.sizeY;
     texture=tex.texture;
+    texturep=1;
     filename=tex.filename;
     data=(unsigned char*)malloc(sizeX*sizeY*3);
     memcpy(data,tex.data,sizeX*sizeY*3);

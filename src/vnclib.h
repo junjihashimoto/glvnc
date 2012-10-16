@@ -32,6 +32,8 @@ struct VNC_Client{
   int    exitp;
 
   Mutex  img_mutex;
+  Mutex  set_mutex;
+  Mutex  get_mutex;
 
   VNC_Client();
 

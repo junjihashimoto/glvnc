@@ -143,11 +143,15 @@ Bitmap<T>::init(int w,int h){
     rgb=(color<T>*)malloc(sizeof(color<T>)*w*h);
     assert(rgb!=NULL);
   }else{
-    free(rgb);
-    this->w=w;
-    this->h=h;
-    rgb=(color<T>*)malloc(sizeof(color<T>)*w*h);
-    assert(rgb!=NULL);
+    if(this->w==w&&
+       this->h==h){
+    }else{
+      free(rgb);
+      this->w=w;
+      this->h=h;
+      rgb=(color<T>*)malloc(sizeof(color<T>)*w*h);
+      assert(rgb!=NULL);
+    }
   }
   clear();
   return 0;

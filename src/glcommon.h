@@ -61,18 +61,28 @@ public:
       data=NULL;
       data=(unsigned char*)malloc(sizeof(unsigned char)*(sizeX+align)*bmp.h*3);
     }
-    bmp_for3(bmp)
-      data[x*3+y*(3*(sizeX)+align)+z]=bmp(x,y,z);
+    if(align==0&&(sizeof(bmp.rgb[0])==3)){
+      //      memcpy(data,bmp.rgb,3*sizeX*sizeY);
+    }else{
+      bmp_for3(bmp)
+	data[x*3+y*(3*(sizeX)+align)+z]=bmp(x,y,z);
+    }
     //    glEnable( GL_TEXTURE_RECTANGLE_ARB );
     glGenTextures( 1, &texture );
     glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texture );
     //  glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-       glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-       glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     /* glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST ); */
     /* glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST ); */
        //       printf("align %d\n",align);
-       glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+       
+    if(align==0&&(sizeof(bmp.rgb[0])==3)){
+      //      memcpy(data,bmp.rgb,3*sizeX*sizeY);
+      glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, bmp.rgb );
+    }else{
+      glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+    }
     //    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, 0 );
     //    glDisable(GL_TEXTURE_RECTANGLE_ARB);//テクスチャ無効
   }

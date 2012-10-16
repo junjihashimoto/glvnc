@@ -60,7 +60,7 @@ handler(int sig) {
 class HANDLER_INIT{
 public:
   HANDLER_INIT(){
-    signal(SIGSEGV, handler);
+    //    signal(SIGSEGV, handler);
   }
 }handler_init;
 

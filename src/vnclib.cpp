@@ -135,7 +135,7 @@ THREAD_CALLBACK(run)(void* vncp){
       printf("bell\n");
       break;
     case 3:
-      printf("%s\n",vnc.get_cuttext().c_str());
+      printf("clip board:%s\n",vnc.get_cuttext().c_str());
       break;
     defaule:
       assert(0);
@@ -333,6 +333,7 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
 int
 VNC_Client::set_display(int inc){
+  Lock lock(set_mutex);
   //update request
   write8(3);       //id
   write8(inc);       //incremental
@@ -346,6 +347,7 @@ VNC_Client::set_display(int inc){
 
 const BMPb&
 VNC_Client::get_display(){
+  Lock lock(get_mutex);
   // int mtype;
   int num_of_rec;
   // read8(mtype);
@@ -370,6 +372,7 @@ VNC_Client::get_display(){
       int  total=0;
       do{
 	int num=read(fd,imgbuf+total,w*bits_per_pixel/8-total);
+	assert(num!=-1);
 	total+=num;
       }while(w*bits_per_pixel/8!=total);
       
@@ -409,6 +412,7 @@ VNC_Client::close(){
 
 int
 VNC_Client::set_point(int x,int y,int button){
+  Lock lock(set_mutex);
   write8(5);//message-type
   write8(button);//padding
   write16(x);//num of encodings
@@ -418,6 +422,7 @@ VNC_Client::set_point(int x,int y,int button){
 
 int
 VNC_Client::set_key(int key,int down){
+  Lock lock(set_mutex);
   write8(4);//message-type
   write8(down);//padding
   write16(0);//num of encodings
@@ -427,6 +432,7 @@ VNC_Client::set_key(int key,int down){
 
 int
 VNC_Client::set_cuttext(const std::string& text){
+  Lock lock(set_mutex);
   write8(6);//message-type
   write8(0);//padding
   write8(0);//padding
@@ -438,6 +444,7 @@ VNC_Client::set_cuttext(const std::string& text){
 
 int
 VNC_Client::get_colormap(){
+  Lock lock(get_mutex);
   int len;
   read8(padding);
   read32(len);
@@ -452,6 +459,7 @@ VNC_Client::get_colormap(){
 
 std::string
 VNC_Client::get_cuttext(){
+  Lock lock(get_mutex);
   std::string r;
   read8(padding);
   read8(padding);

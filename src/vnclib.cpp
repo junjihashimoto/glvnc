@@ -13,6 +13,7 @@ extern "C"{
 #include <netdb.h>
 #include <unistd.h>
 }
+#include "glcommon.h"
 
 #include "d3des.h"
 #include <bmp.h>
@@ -121,10 +122,16 @@ THREAD_CALLBACK(run)(void* vncp){
     switch(mtype){
     case 0:
       vnc.get_display();
-      
+
+      // tex.set(vnc.img);
       vnc.img_mutex.lock();
       vnc.img2=vnc.img;
+      // //houghlines(vnc.img,vnc.img2);
+      //vnc.img2.swap(vnc.img);
       vnc.img_mutex.unlock();
+      
+      // tex.set(vnc.img);
+      // glutPostRedisplay();
       
       vnc.set_display(1);
       break;
@@ -334,13 +341,23 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 int
 VNC_Client::set_display(int inc){
   Lock lock(set_mutex);
-  //update request
-  write8(3);       //id
-  write8(inc);       //incremental
-  write16(0);//xpos
-  write16(0);//ypos
-  write16(width);//width
-  write16(height);//height
+  unsigned char array[]={
+    0x3,
+    inc,
+    0,0,
+    0,0,
+    width>>8,width&0xff,
+    height>>8,height&0xff
+  };
+  write(fd,array,sizeof(array));
+
+  // //update request
+  // write8(3);       //id
+  // write8(inc);       //incremental
+  // write16(0);//xpos
+  // write16(0);//ypos
+  // write16(width);//width
+  // write16(height);//height
   return 0;
 }
 
@@ -413,20 +430,38 @@ VNC_Client::close(){
 int
 VNC_Client::set_point(int x,int y,int button){
   Lock lock(set_mutex);
-  write8(5);//message-type
-  write8(button);//padding
-  write16(x);//num of encodings
-  write16(y);//Raw
+  unsigned char array[]={
+    0x5,
+    button,
+    x>>8,x&0xff,
+    y>>8,y&0xff
+  };
+  write(fd,array,sizeof(array));
+  // write8(5);//message-type
+  // write8(button);//padding
+  // write16(x);//num of encodings
+  // write16(y);//Raw
   return 0;
 }
 
 int
 VNC_Client::set_key(int key,int down){
   Lock lock(set_mutex);
-  write8(4);//message-type
-  write8(down);//padding
-  write16(0);//num of encodings
-  write32(key);//Raw
+  unsigned char array[]={
+    0x4,
+    down,
+    0,0,
+    (key>>24)&0xff,
+    (key>>16)&0xff,
+    (key>>8)&0xff,
+    key&0xff
+  };
+  write(fd,array,sizeof(array));
+  
+  // write8(4);//message-type
+  // write8(down);//padding
+  // write16(0);//num of encodings
+  // write32(key);//Raw
   return 0;
 }
 

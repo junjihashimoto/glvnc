@@ -1,13 +1,3 @@
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
-#include <string>
-extern "C"{
-#include <GL/gl.h>
-#include <GL/glut.h>
-#include <GL/freeglut_ext.h>
-}
-
 #include "glcommon.h"
 #include "utils.h"
 
@@ -58,8 +48,9 @@ Texture tex;
 void timer(int value) {
   Max=mycount;
   mycount=0;
-  glutTimerFunc(100 , timer , 0);
-  glutPostRedisplay();
+  glutTimerFunc(1000 , timer , 0);
+  // glutPostRedisplay();
+  //vnc.set_display(1);
 }
 
 char buf[255],buf2[255];
@@ -67,8 +58,8 @@ char buf[255],buf2[255];
 void
 display_fps(){
   mycount++;
-  sprintf(buf,"%d",mycount);
-  sprintf(buf2,"%d",Max);
+  sprintf(buf,"%03d",mycount);
+  sprintf(buf2,"%03d",Max);
   str="space on/off FPS[";
   str+=buf2;
   str+="] FRAME[";
@@ -93,7 +84,7 @@ display_fps(){
 
 void
 display(void){
-
+  mycount++;
   //  posx+=4.0f;
   //  printf("display\n");
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -102,6 +93,8 @@ display(void){
   glLoadIdentity();
   glOrtho(0.0, WIDTH, HEIGHT, 0.0, -1.0, 1.0);
 
+  Square(mousedat.x-1,mousedat.y-10,
+	 mousedat.x+1,mousedat.y+10);
 
   glPushMatrix();
   {
@@ -112,10 +105,11 @@ display(void){
     tex.set(vnc.img2);
     vnc.img_mutex.unlock();
     tex.display();
+    //vnc.set_display(1);
   }
   glPopMatrix();
   
-  display_fps();
+  //  display_fps();
 
   glutSwapBuffers();
 
@@ -426,9 +420,9 @@ main(int argc, char *argv[]){
 
   glutDisplayFunc(display);
   Init();
-  //  set_vsync(1);
-  glutTimerFunc(100 , timer , 0);
-  //glutIdleFunc(idle);
+  set_vsync(1);
+  //glutTimerFunc(1000 , timer , 0);
+  glutIdleFunc(idle);
   glutDropFileFunc(dropfile);
   //  glutReshapeFunc(reshape);
 
@@ -439,12 +433,16 @@ main(int argc, char *argv[]){
   //     //    }
   // }
 
+  glutSetCursor(GLUT_CURSOR_NONE);
   vnc.init(argv[1],atoi(argv[2]),argv[3]);
   // texidx=0;
   // BMPb b=vnc.get_display();
   // b.write("snap.png");
   // //  tex=Texture(vnc.get_display());
   // tex.set(b);
+  //  vnc.set_display(1);
+  // vnc.get_display();
+  // tex.set(vnc.img);
   
   glutMainLoop();
   vnc.close();

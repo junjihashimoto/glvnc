@@ -41,9 +41,11 @@ clean:
 	-rm -rf $(PROGRAMS)
 
 obj/%.o:%.cpp $(HEADERS)
+	-if [ ! -d obj ] ; then mkdir obj ;fi
 	$(CXX) -c -o $@ $< $(CFLAGS)
 
 
 bin/%$(EXE):obj/%.o $(LIBS) $(NPROG)
+	-if [ ! -d bin ] ; then mkdir bin ;fi
 	$(CXX) -o $@ $<  $(CFLAGS) $(NPROG) $(LIBS) $(OTHER_LIBS)
 #	cp ../bin/template ../$@

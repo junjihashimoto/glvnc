@@ -212,27 +212,27 @@ static int fghNetWMSupported(void)
 /*  Check if "hint" is present in "property" for "window". */
 int fgHintPresent(Window window, Atom property, Atom hint)
 {
-  Atom ** atoms_ptr;
+  Atom *atoms;
   int number_of_atoms;
   int supported;
   int i;
 
   supported = 0;
 
-  atoms_ptr = malloc(sizeof(Atom *));
   number_of_atoms = fghGetWindowProperty(window,
 					 property,
 					 XA_ATOM,
-					 (unsigned char **) atoms_ptr);
+					 (unsigned char **) &atoms);
   for (i = 0; i < number_of_atoms; i++)
-    {
-      if ((*atoms_ptr)[i] == hint)
+  {
+      if (atoms[i] == hint)
       {
           supported = 1;
           break;
       }
-    }
+  }
 
+  XFree(atoms);
   return supported;
 }
 
@@ -391,7 +391,12 @@ static void fghInitialize( const char* displayName )
 #endif
 
     fgState.Initialised = GL_TRUE;
+
+    /* Avoid registering atexit callback on Win32 as it results in an access
+     * violation due to calling into a module which has been unloaded. */
+#if ( TARGET_HOST_MS_WINDOWS == 0 )
     atexit(fgDeinitialize);
+#endif
 
     /* InputDevice uses GlutTimerFunc(), so fgState.Initialised must be TRUE */
     fgInitialiseInputDevices();
@@ -407,6 +412,11 @@ void fgDeinitialize( void )
     if( !fgState.Initialised )
     {
         return;
+    }
+
+	/* If we're in game mode, we want to leave game mode */
+    if( fgStructure.GameModeWindow ) {
+        glutLeaveGameMode();
     }
 
     /* If there was a menu created, destroy the rendering context */

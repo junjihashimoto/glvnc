@@ -168,7 +168,7 @@ vnckey(unsigned char key,int updown){
       vnc.set_key(key|0xff00,updown);
       break;
     case 0x7f://del
-      vnc.set_key(0xff7f,updown);
+      vnc.set_key(0xffff,updown);
       break;
     default:
       vnc.set_key(key,updown);
@@ -178,7 +178,6 @@ vnckey(unsigned char key,int updown){
 
 void 
 vncskey(unsigned char key,int updown){
-  //  printf("skey %x\n",(int)key);
   switch(key){
   case 0x01://f1
   case 0x02:
@@ -218,6 +217,8 @@ vncskey(unsigned char key,int updown){
   case 0x74://alt
     alt_key=updown;
     vnc.set_key(0xffe9,updown);break;
+  case 0x78://zenkaku_hanaku
+    vnc.set_key(0xff28,updown);break;
   case 0x76://super
     //    vnc.set_key(0xffe9,updown);break;
     break;
@@ -230,6 +231,7 @@ vncskey(unsigned char key,int updown){
 void
 keydown(unsigned char key, int x, int y){
 
+  //  printf("key down:%d\n",(int)key);
   if(super_toggle){
     vnckey(key,1);
   }else{
@@ -273,7 +275,9 @@ keyup(unsigned char key, int x, int y){
 
 void
 skeydown(int key, int x, int y){
-  if(key==0x76)
+  printf("skey down:%d\n",(int)key);
+  //  if(key==0x76)//windows key
+  if(key==0x73)//right contrl key
      super_toggle = super_toggle ? 0:1;
   // //  printf("super_togle %d\n",super_toggle);
   if(super_toggle){
@@ -387,6 +391,8 @@ Init(){
 
 void
 reshape(int w,int h){
+  printf("reshape\n");
+  vnc.set_key(0xffe9,0);
 }
 
 
@@ -424,7 +430,7 @@ main(int argc, char *argv[]){
   //glutTimerFunc(1000 , timer , 0);
   glutIdleFunc(idle);
   glutDropFileFunc(dropfile);
-  //  glutReshapeFunc(reshape);
+  glutReshapeFunc(reshape);
 
   // for(int i=1;i<argc;i++){
   //   //    if(file_exist(argv[i])){

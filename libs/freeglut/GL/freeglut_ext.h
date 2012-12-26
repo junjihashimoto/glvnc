@@ -46,6 +46,7 @@
 #define GLUT_KEY_ALT_R              0x0075
 #define GLUT_KEY_SUPER_L            0x0076
 #define GLUT_KEY_SUPER_R            0x0077
+#define GLUT_KEY_KANJI              0x0078
 
 /*
  * GLUT API Extension macro definitions -- behaviour when the user clicks on an "x" to close a window

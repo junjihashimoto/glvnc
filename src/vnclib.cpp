@@ -9,6 +9,7 @@ extern "C"{
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
@@ -21,26 +22,39 @@ extern "C"{
 #include "filter.h"
 
 
+void
+myread(int fd,unsigned char* buf,int n) {
+  int total=0;
+  while(total!=n){
+    int v;
+    total+=(v=read(fd,buf+total,n-total));
+    assert(v>=0);
+  }
+}
+
 
 
 #define read8(val) {				\
     unsigned char buf[1];			\
-    int s=read(fd,buf,1);				\
+    int s=read(fd,buf,1);			\
     assert(s==1);				\
     val=buf[0];					\
   }
+
 #define read16(val) {				\
     unsigned char buf[2];			\
-    int s=read(fd,buf,2);				\
-    assert(s==2);				\
+    myread(fd,buf,2);                            \
     val=nto_uint16(buf);			\
   }
+
 #define read32(val) {				\
     unsigned char buf[4];			\
-    int s=read(fd,buf,4);				\
-    assert(s==4);				\
+    myread(fd,buf,4);                            \
     val=nto_uint32(buf);			\
   }
+
+
+
 #define readn(len) {				\
     unsigned char buf[1024];			\
     int s=read(fd,buf,len);				\
@@ -153,7 +167,33 @@ THREAD_CALLBACK(run)(void* vncp){
 }
 
 
-VNC_Client::VNC_Client():thread(run){
+THREAD_CALLBACK(run_read)(void* vncp){
+  VNC_Client& vnc=*(VNC_Client*)vncp;
+  while(vnc.exitp==0){
+    vector<Dat> d;
+    {
+      Lock lock(vnc.q_mutex);
+      while(vnc.que.empty()){
+	vnc.q_cond.wait(lock);
+      }
+
+      while(!vnc.que.empty()){
+	d.push_back(vnc.que.front());
+	vnc.que.pop();
+      }
+    }
+    {
+      Lock lock2(vnc.set_mutex);
+      write(vnc.fd,d[d.size()-1].p,d[d.size()-1].len);
+
+    }
+    for(int i=0;i<d.size();i++)
+      free(d[i].p);
+  }
+}
+
+
+VNC_Client::VNC_Client():thread(run),thread_read(run_read){
 }
 
 int
@@ -185,7 +225,11 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   assert(fd>=0);
 
   r=connect(fd,(sockaddr*)&dstAddr,sizeof(dstAddr));
+  assert(r>=0);
 
+
+  int one = 1;
+  setsockopt(fd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));  
   assert(r>=0);
 
   unsigned char buf[1024];
@@ -334,6 +378,7 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
   set_display(0);
   thread.run(this);
+  thread_read.run(this);
   
   return 0;
 }
@@ -350,6 +395,7 @@ VNC_Client::set_display(int inc){
     height>>8,height&0xff
   };
   write(fd,array,sizeof(array));
+  fsync(fd);
 
   // //update request
   // write8(3);       //id
@@ -378,13 +424,18 @@ VNC_Client::get_display(){
 
   for(int i=0;i<num_of_rec;i++){
     int x,y,w,h,enc;
+    int enc0;
+    int enc1;
     read16(x);
     read16(y);
     read16(w);
     read16(h);
     read32(enc);
+    // read16(enc0);
+    // read16(enc1);
     //    printf("x:%d, y:%d, w:%d, h:%d, end:%d\n",x,y,w,h,enc);
-    assert(enc==0);
+    // assert(enc0==0);
+    // assert(enc1==0);
     for(int j=0;j<h;j++){
       int  total=0;
       do{
@@ -420,6 +471,7 @@ VNC_Client::get_display(){
 int
 VNC_Client::close(){
   exitp=1;
+  thread_read.join();
   thread.join();
   ::close(fd);
   free(imgbuf);
@@ -429,7 +481,7 @@ VNC_Client::close(){
 
 int
 VNC_Client::set_point(int x,int y,int button){
-  Lock lock(set_mutex);
+  //  Lock lock(set_mutex);
   unsigned char array[]={
     0x5,
     button,
@@ -437,12 +489,35 @@ VNC_Client::set_point(int x,int y,int button){
     y>>8,y&0xff
   };
   write(fd,array,sizeof(array));
-  // write8(5);//message-type
-  // write8(button);//padding
-  // write16(x);//num of encodings
-  // write16(y);//Raw
+  fsync(fd);
   return 0;
 }
+
+// int
+// VNC_Client::set_pointn(int x,int y,int button){
+//   //  Lock lock(set_mutex);
+//   unsigned char array[]={
+//     0x5,
+//     button,
+//     x>>8,x&0xff,
+//     y>>8,y&0xff
+//   };
+//   int len=sizeof(array);
+//   Dat d={(unsigned char*)malloc(len),len};
+//   memcpy((char*)d.p,(char*)array,len);
+//   assert(d.len==len);
+//   {
+//     Lock lock(q_mutex);
+//     que.push(d);
+//   }
+//   //  printf("push: %d %d\n",(int)array[2],(int)array[3]);
+//   q_cond.notify();
+//   // write8(5);//message-type
+//   // write8(button);//padding
+//   // write16(x);//num of encodings
+//   // write16(y);//Raw
+//   return 0;
+// }
 
 int
 VNC_Client::set_key(int key,int down){
@@ -457,6 +532,7 @@ VNC_Client::set_key(int key,int down){
     key&0xff
   };
   write(fd,array,sizeof(array));
+  fsync(fd);
   
   // write8(4);//message-type
   // write8(down);//padding

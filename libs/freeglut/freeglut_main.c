@@ -1768,6 +1768,7 @@ void FGAPIENTRY glutMainLoopEvent( void )
 		      case XK_Alt_R:     special = GLUT_KEY_ALT_R;      break;
 		      case XK_Super_L:   special = GLUT_KEY_SUPER_L;    break;
 		      case XK_Super_R:   special = GLUT_KEY_SUPER_R;    break;
+		      case XK_Zenkaku_Hankaku:   special = GLUT_KEY_KANJI;    break;
 		      }
 
                     /*

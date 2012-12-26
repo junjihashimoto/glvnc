@@ -1,6 +1,13 @@
 #include <string>
 #include <bmp.h>
+#include <queue>
+using namespace std;
 #include "thread.h"
+
+struct Dat{
+  unsigned char* p;
+  int   len;
+};
 
 struct VNC_Client{
   int fd;
@@ -29,11 +36,15 @@ struct VNC_Client{
   BMPb  img3;
 
   Thread thread;
+  Thread thread_read;
   int    exitp;
 
   Mutex  img_mutex;
   Mutex  set_mutex;
   Mutex  get_mutex;
+  Mutex  q_mutex;
+  Cond   q_cond;
+  queue<Dat> que;
 
   VNC_Client();
 

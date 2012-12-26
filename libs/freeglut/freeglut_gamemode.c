@@ -59,10 +59,10 @@ static int xrandr_resize(int xsz, int ysz, int rate, int just_checking)
      * the user actually cares about it (rate > 0)
      */
     use_rate = ( rate > 0 ) && ( ( ver_major >= 1 ) ||
-		                         ( ver_major == 1 ) && ( ver_minor >= 1 ) );
+		                         ( ( ver_major == 1 ) && ( ver_minor >= 1 ) ) );
 
     /* this loop is only so that the whole thing will be repeated if someone
-     * else changes video mode between our query the current information and
+     * else changes video mode between our query of the current information and
      * the attempt to change it.
      */
     do {
@@ -106,10 +106,8 @@ static int xrandr_resize(int xsz, int ysz, int rate, int just_checking)
             break;  /* no matching resolution */
 
 #if ( RANDR_MAJOR >= 1 ) || ( ( RANDR_MAJOR == 1 ) && ( RANDR_MINOR >= 1 ) )
-        if(rate <= 0) {
-            fgState.GameModeRefresh = XRRConfigCurrentRate(xrr_config);
-        }
-
+        if(rate <= 0)
+          fgState.GameModeRefresh = XRRConfigCurrentRate(xrr_config);
         if(use_rate) {
             rate = fgState.GameModeRefresh;
 

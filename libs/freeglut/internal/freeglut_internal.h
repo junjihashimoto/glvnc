@@ -95,7 +95,7 @@
 #if TARGET_HOST_MS_WINDOWS && !defined(_WIN32_WCE)
 #    include <windows.h>
 #    include <windowsx.h>
-#    include <shellapi.h>
+//#    include <shellapi.h>
 #    include <mmsystem.h>
 /* CYGWIN does not have tchar.h, but has TEXT(x), defined in winnt.h. */
 #    ifndef __CYGWIN__
@@ -110,8 +110,8 @@
 #    include <X11/Xlib.h>
 #    include <X11/Xatom.h>
 #    include <X11/keysym.h>
-//#    include <X11/extensions/XInput.h>
-#    include <X11/extensions/XI.h>
+#    include <X11/extensions/XInput.h>
+//#    include <X11/extensions/XI.h>
 #    ifdef HAVE_X11_EXTENSIONS_XF86VMODE_H
 #        include <X11/extensions/xf86vmode.h>
 #    endif

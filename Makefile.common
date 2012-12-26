@@ -97,7 +97,8 @@ else
 #CFLAGS:= -g $(FLAGS)
 #CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize -mmmx -msse3 -mssse3 -msse4.1 -msse4.2
 #CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -msse4.2 -march=native -fopenmp
-CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -mavx -march=native -fopenmp
+#CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -mavx -march=native -fopenmp
+CFLAGS:=  -O4 -DNDEBUG  $(FLAGS) -ftree-vectorize  -msse2 -march=native -fopenmp
 endif
 
 endif

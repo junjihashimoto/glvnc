@@ -158,7 +158,7 @@ THREAD_CALLBACK(run)(void* vncp){
     case 3:
       printf("clip board:%s\n",vnc.get_cuttext().c_str());
       break;
-    defaule:
+    default:
       assert(0);
       break;
     }
@@ -374,7 +374,6 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
 
   imgbuf=(char*)malloc(width*height*bits_per_pixel/8);
-  lbuf  =(char*)malloc(width*bits_per_pixel/8);
 
   set_display(0);
   thread.run(this);
@@ -420,8 +419,6 @@ VNC_Client::get_display(){
   
   //  printf("num_of_rec %d\n",num_of_rec);
 
-
-
   for(int i=0;i<num_of_rec;i++){
     int x,y,w,h,enc;
     int enc0;
@@ -431,37 +428,56 @@ VNC_Client::get_display(){
     read16(w);
     read16(h);
     read32(enc);
-    // read16(enc0);
-    // read16(enc1);
-    //    printf("x:%d, y:%d, w:%d, h:%d, end:%d\n",x,y,w,h,enc);
-    // assert(enc0==0);
-    // assert(enc1==0);
-    for(int j=0;j<h;j++){
-      int  total=0;
-      do{
-	int num=read(fd,imgbuf+total,w*bits_per_pixel/8-total);
-	assert(num!=-1);
-	total+=num;
-      }while(w*bits_per_pixel/8!=total);
+
+    int  total=0;
+    do{
+      int num=read(fd,imgbuf+total,h*w*bits_per_pixel/8-total);
+      assert(num!=-1);
+      total+=num;
+    }while(h*w*bits_per_pixel/8!=total);
       
-      for(int k=0;k<w;k++){
-	if(bits_per_pixel==16&&big_endian_flag==0){
-	  unsigned short v=imgbuf[k*2]|(imgbuf[k*2+1]<<8);
+    if(bits_per_pixel==16&&big_endian_flag==0){
+      for(int j=0;j<h;j++){
+	for(int k=0;k<w;k++){
+	  int idx=(w*j+k)*2;
+	  unsigned short v=imgbuf[idx]|(imgbuf[idx+1]<<8);
 	  img(x+k,y+j)[0]=((v>>(red_shift))&(red_max))*(256)/(red_max+1);
 	  img(x+k,y+j)[1]=(v>>(green_shift))&(green_max)*(256)/(green_max+1);
 	  img(x+k,y+j)[2]=(v>>(blue_shift))&(blue_max)*(256)/(blue_max+1);
-	}else if(bits_per_pixel==32&&big_endian_flag==0){
-	  //	  uint32_t v=*(uint32_t*)(imgbuf+k*4);
-	  uint32_t v=*(uint32_t*)(imgbuf+k*4);
+	}
+      }
+    }else if(bits_per_pixel==32&&
+	     big_endian_flag==0&&
+	     red_shift==16&&
+	     green_shift==8&&
+	     blue_shift==0&&
+	     red_max==255&&
+	     green_max==255&&
+	     blue_max==255
+	     ){
+      int idx=0;
+      for(int j=0;j<h;j++){
+	for(int k=0;k<w;k++){
+	  uint8_t* v=(uint8_t*)(imgbuf+idx);
+	  img(x+k,y+j)[0]=v[2];
+	  img(x+k,y+j)[1]=v[1];
+	  img(x+k,y+j)[2]=v[0];
+	  idx+=4;
+	}
+      }
+    }else if(bits_per_pixel==32&&big_endian_flag==0){
+      for(int j=0;j<h;j++){
+	for(int k=0;k<w;k++){
+	  int idx=(w*j+k)*4;
+	  uint32_t v=*(uint32_t*)(imgbuf+idx);
 	  img(x+k,y+j)[0]=((v>>(red_shift))  &(red_max))  *(256)/(red_max+1);
 	  img(x+k,y+j)[1]=((v>>(green_shift))&(green_max))*(256)/(green_max+1);
 	  img(x+k,y+j)[2]=((v>>(blue_shift)) &(blue_max)) *(256)/(blue_max+1);
-	}else{
-	  assert(0);
 	}
       }
+    }else{
+      assert(0);
     }
-    //    printf("rec %d %d %d %d %d\n",x,y,w,h,enc);
   }
   return img;
 }
@@ -475,7 +491,6 @@ VNC_Client::close(){
   thread.join();
   ::close(fd);
   free(imgbuf);
-  free(lbuf);
   return 0;
 }
 

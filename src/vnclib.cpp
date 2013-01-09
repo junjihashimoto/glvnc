@@ -141,13 +141,12 @@ THREAD_CALLBACK(run)(void* vncp){
       vnc.img_mutex.lock();
       vnc.img2=vnc.img;
       //facedetect(vnc.img,vnc.img2);
-      // //houghlines(vnc.img,vnc.img2);
+      //houghlines(vnc.img,vnc.img2);
       //vnc.img2.swap(vnc.img);
       vnc.img_mutex.unlock();
       
       // tex.set(vnc.img);
       // glutPostRedisplay();
-      
       vnc.set_display(1);
       break;
     case 1:

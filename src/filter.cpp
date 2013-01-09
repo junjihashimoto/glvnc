@@ -80,7 +80,8 @@ facedetect(Mat& img){
   //  imwrite("small.png",smallImg);
 
   // 分類器の読み込み
-  std::string cascadeName = "/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"; // Haar-like
+  //  std::string cascadeName = "/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"; // Haar-like
+    std::string cascadeName = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml"; // Haar-like
   //    std::string cascadeName = "haarcascade_animeface2.xml"; // Haar-like
   //std::string cascadeName = "./lbpcascade_frontalface.xml"; // LBP
   CascadeClassifier cascade;

@@ -25,11 +25,15 @@ string str="";
 int fullscreen=0;
 int g_LeaveGameMode=0;
 
+float picw=0.0f;
+float pich=0.0f;
 float posx=0.0f;
 float posy=0.0f;
 float picx=0;
 float picy=0;
 float scale=1.0f;
+float angle=0.0f;
+int   small=0;
 
 float org_posx=0.0f;
 float org_posy=0.0f;
@@ -54,6 +58,32 @@ void timer(int value) {
 }
 
 char buf[255],buf2[255];
+
+void gen_picxy(){
+  int x,y;
+  int mx,my;
+  double ang=-angle/180.0*M_PI;
+
+
+  x=(mousedat.x-posx)/scale;
+  y=(mousedat.y-posy)/scale;
+
+  picx=cos(ang)*x-sin(ang)*y;
+  picy=sin(ang)*x+cos(ang)*y;
+  printf("%f %f\n",(double)picx,(double)picy);
+  
+}
+
+void gen_posxy(){
+  int x;
+  int y;
+  double ang=angle/180.0*M_PI;
+  x=cos(ang)*picx-sin(ang)*picy;
+  y=sin(ang)*picx+cos(ang)*picy;
+  
+  posx=mousedat.x-x*scale;
+  posy=mousedat.y-y*scale;
+}
 
 void
 display_fps(){
@@ -99,27 +129,46 @@ display(void){
   
   glPushMatrix();
   {
+
+    // {
+    //   Lock(vnc.img_mutex);
+    //   picw=tex.sizeX;
+    //   pich=tex.sizeY;
+    // }
+    
+    //    glTranslatef(picw/2,pich/2,0.0f);
+    //    glTranslatef(-picw/2,-pich/2,0.0f);
+
     glTranslatef(posx,posy,0.0f);
     glScalef(scale,scale,scale);
+    
     glColor3ub(255,255,255);
-    vnc.img_mutex.lock();
-    tex.set(vnc.img2);
-    vnc.img_mutex.unlock();
+    {
+      vnc.img_mutex.lock();
+      //      Lock(vnc.img_mutex);
+      
+      tex.set(vnc.img2);
+      vnc.img_mutex.unlock();
+	    
+    }
+    glRotatef(angle,0.0f,0.0f,1.0f);
     tex.display();
   }
   glPopMatrix();
   
 
-  // glPushMatrix();
-  // {
-  //   glScalef(0.2,0.2,0.2);
-  //   glColor3ub(255,255,255);
-  //   vnc.img_mutex.lock();
-  //   tex.set(vnc.img2);
-  //   vnc.img_mutex.unlock();
-  //   tex.display();
-  // }
-  // glPopMatrix();
+  if(small){
+    glPushMatrix();
+    {
+      glScalef(0.2,0.2,0.2);
+      glColor3ub(255,255,255);
+      vnc.img_mutex.lock();
+      tex.set(vnc.img2);
+      vnc.img_mutex.unlock();
+      tex.display();
+    }
+    glPopMatrix();
+  }
   //  display_fps();
 
   glutSwapBuffers();
@@ -252,9 +301,14 @@ keydown(unsigned char key, int x, int y){
       posy=0.0f;
       scale=1.0f;
       break;
+    case 'r':
+      angle+=30.0f;
+      break;
+    case 'R':
+      angle-=30.0f;
+      break;
     case 's':
-      printf("write:snap.png\n");
-      vnc.img.write("snap.png");
+      small=small?0:1;
       break;
     case 'f':
       fullscreen = !fullscreen;
@@ -332,9 +386,8 @@ mouse(int button , int state , int x , int y) {
   org_posx=x;
   org_posy=y;
   org_scale=scale;
-  //  printf("%d\n",button);
-  picx=(x-posx)/scale;
-  picy=(y-posy)/scale;
+  
+  gen_picxy();
 
   if(super_toggle){
     vnc.set_point(picx,picy,mouse_vnc2glut(mousedat.button,mousedat.state));
@@ -351,8 +404,7 @@ mouse(int button , int state , int x , int y) {
     if(button==GLUT_DOWN&&button == GLUT_LEFT_BUTTON ){
 
     }
-    posx=x-picx*scale;
-    posy=y-picy*scale;
+    gen_posxy();
   }
 }
 
@@ -362,8 +414,7 @@ motion(int x , int y) {
   mousedat.x=x;
   mousedat.y=y;
   if(super_toggle){
-    picx=(mousedat.x-posx)/scale;
-    picy=(mousedat.y-posy)/scale;
+    gen_picxy();
     vnc.set_point(picx,picy,mouse_vnc2glut(mousedat.button,mousedat.state));
   }else{
     if(mousedat.ctrl){
@@ -373,16 +424,14 @@ motion(int x , int y) {
       else if(scale>100)
 	scale=100;
     }
-    posx=x-picx*scale;
-    posy=y-picy*scale;
+    gen_posxy();
   }
 }
 void
 passive_motion(int x , int y) {
   mousedat.x=x;
   mousedat.y=y;
-  picx=(mousedat.x-posx)/scale;
-  picy=(mousedat.y-posy)/scale;
+  gen_picxy();
   if(super_toggle){
     vnc.set_point(picx,picy,mouse_vnc2glut(mousedat.button,mousedat.state));
   }
@@ -454,7 +503,7 @@ main(int argc, char *argv[]){
   //     //    }
   // }
 
-  glutSetCursor(GLUT_CURSOR_NONE);
+  //  glutSetCursor(GLUT_CURSOR_NONE);
   vnc.init(argv[1],atoi(argv[2]),argv[3]);
   // texidx=0;
   // BMPb b=vnc.get_display();

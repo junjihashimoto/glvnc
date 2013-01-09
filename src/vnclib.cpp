@@ -140,6 +140,7 @@ THREAD_CALLBACK(run)(void* vncp){
       // tex.set(vnc.img);
       vnc.img_mutex.lock();
       vnc.img2=vnc.img;
+      //facedetect(vnc.img,vnc.img2);
       // //houghlines(vnc.img,vnc.img2);
       //vnc.img2.swap(vnc.img);
       vnc.img_mutex.unlock();
@@ -373,7 +374,7 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   }
 
 
-  imgbuf=(char*)malloc(width*height*bits_per_pixel/8);
+  imgbuf=(uint8_t*)malloc(width*height*bits_per_pixel/8);
 
   set_display(0);
   thread.run(this);
@@ -384,6 +385,7 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
 int
 VNC_Client::set_display(int inc){
+
   Lock lock(set_mutex);
   unsigned char array[]={
     0x3,
@@ -437,13 +439,15 @@ VNC_Client::get_display(){
     }while(h*w*bits_per_pixel/8!=total);
       
     if(bits_per_pixel==16&&big_endian_flag==0){
+      int idx=0;
       for(int j=0;j<h;j++){
 	for(int k=0;k<w;k++){
-	  int idx=(w*j+k)*2;
-	  unsigned short v=imgbuf[idx]|(imgbuf[idx+1]<<8);
+	  uint8_t* t=(uint8_t*)(imgbuf+idx);
+	  unsigned short v=(t[1]<<8)|t[0];
 	  img(x+k,y+j)[0]=((v>>(red_shift))&(red_max))*(256)/(red_max+1);
 	  img(x+k,y+j)[1]=(v>>(green_shift))&(green_max)*(256)/(green_max+1);
 	  img(x+k,y+j)[2]=(v>>(blue_shift))&(blue_max)*(256)/(blue_max+1);
+	  idx+=2;
 	}
       }
     }else if(bits_per_pixel==32&&
@@ -458,10 +462,9 @@ VNC_Client::get_display(){
       int idx=0;
       for(int j=0;j<h;j++){
 	for(int k=0;k<w;k++){
-	  uint8_t* v=(uint8_t*)(imgbuf+idx);
-	  img(x+k,y+j)[0]=v[2];
-	  img(x+k,y+j)[1]=v[1];
-	  img(x+k,y+j)[2]=v[0];
+	  img.rgb[x+k+img.w*(y+j)].b=imgbuf[idx];
+	  img.rgb[x+k+img.w*(y+j)].g=imgbuf[idx+1];
+	  img.rgb[x+k+img.w*(y+j)].r=imgbuf[idx+2];
 	  idx+=4;
 	}
       }

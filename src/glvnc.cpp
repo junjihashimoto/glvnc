@@ -13,8 +13,8 @@ using namespace std;
 
 #define INIT_WIDTH  640
 #define INIT_HEIGHT 480
-#define WIDTH  glutGet(GLUT_WINDOW_WIDTH)
-#define HEIGHT glutGet(GLUT_WINDOW_HEIGHT)
+int WIDTH=INIT_WIDTH; 
+int HEIGHT=INIT_HEIGHT;
 int pre_width;
 int pre_height;
 
@@ -96,6 +96,7 @@ display(void){
   Square(mousedat.x-1,mousedat.y-10,
 	 mousedat.x+1,mousedat.y+10);
 
+  
   glPushMatrix();
   {
     glTranslatef(posx,posy,0.0f);
@@ -105,10 +106,20 @@ display(void){
     tex.set(vnc.img2);
     vnc.img_mutex.unlock();
     tex.display();
-    //vnc.set_display(1);
   }
   glPopMatrix();
   
+
+  // glPushMatrix();
+  // {
+  //   glScalef(0.2,0.2,0.2);
+  //   glColor3ub(255,255,255);
+  //   vnc.img_mutex.lock();
+  //   tex.set(vnc.img2);
+  //   vnc.img_mutex.unlock();
+  //   tex.display();
+  // }
+  // glPopMatrix();
   //  display_fps();
 
   glutSwapBuffers();
@@ -385,6 +396,8 @@ dropfile(const char* file){
 
 void
 Init(){
+  WIDTH=glutGet(GLUT_WINDOW_WIDTH);
+  HEIGHT=glutGet(GLUT_WINDOW_HEIGHT);
   glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
 }
@@ -392,6 +405,8 @@ Init(){
 void
 reshape(int w,int h){
   printf("reshape\n");
+  WIDTH=glutGet(GLUT_WINDOW_WIDTH);
+  HEIGHT=glutGet(GLUT_WINDOW_HEIGHT);
   vnc.set_key(0xffe9,0);
 }
 
@@ -449,6 +464,8 @@ main(int argc, char *argv[]){
   //  vnc.set_display(1);
   // vnc.get_display();
   // tex.set(vnc.img);
+
+  
   
   glutMainLoop();
   vnc.close();

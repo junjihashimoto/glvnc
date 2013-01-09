@@ -29,7 +29,7 @@ struct VNC_Client{
   int vnc_main_ver;
   int vnc_minor_ver;
 
-  char* imgbuf;
+  uint8_t* imgbuf;
   BMPb  img;
   BMPb  img2;
   BMPb  img3;

@@ -289,10 +289,17 @@ vncskey(unsigned char key,int updown){
 
 void
 window_fit(double tex_w,double tex_h){
-  posx=0.0f;
-  posy=0.0f;
-  scale=WIDTH/tex_w;
-  glutReshapeWindow(WIDTH,tex_h*scale);
+  if(angle==90.0f){
+    posx=WIDTH;
+    posy=0.0f;
+    scale=WIDTH/tex_h;
+    glutReshapeWindow(WIDTH,tex_w*scale);
+  }else{
+    posx=0.0f;
+    posy=0.0f;
+    scale=WIDTH/tex_w;
+    glutReshapeWindow(WIDTH,tex_h*scale);
+  }
 }
 
 void

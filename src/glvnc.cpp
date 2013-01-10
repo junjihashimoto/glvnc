@@ -25,8 +25,8 @@ string str="";
 int fullscreen=0;
 int g_LeaveGameMode=0;
 
-float picw=0.0f;
-float pich=0.0f;
+// float picw=0.0f;
+// float pich=0.0f;
 float posx=0.0f;
 float posy=0.0f;
 float picx=0;
@@ -70,7 +70,7 @@ void gen_picxy(){
 
   picx=cos(ang)*x-sin(ang)*y;
   picy=sin(ang)*x+cos(ang)*y;
-  printf("%f %f\n",(double)picx,(double)picy);
+  //  printf("%f %f\n",(double)picx,(double)picy);
   
 }
 
@@ -287,6 +287,13 @@ vncskey(unsigned char key,int updown){
   }
 }
 
+void
+window_fit(double tex_w,double tex_h){
+  posx=0.0f;
+  posy=0.0f;
+  scale=WIDTH/tex_w;
+  glutReshapeWindow(WIDTH,tex_h*scale);
+}
 
 void
 keydown(unsigned char key, int x, int y){
@@ -300,6 +307,16 @@ keydown(unsigned char key, int x, int y){
       posx=0.0f;
       posy=0.0f;
       scale=1.0f;
+      break;
+    case '2':
+      {
+	vnc.img_mutex.lock();
+	double texx=tex.sizeX;
+	double texy=tex.sizeY;
+	vnc.img_mutex.unlock();
+	window_fit(texx,texy);
+	
+      }
       break;
     case 'r':
       angle+=30.0f;
@@ -340,7 +357,7 @@ keyup(unsigned char key, int x, int y){
 
 void
 skeydown(int key, int x, int y){
-  printf("skey down:%d\n",(int)key);
+  // printf("skey down:%d\n",(int)key);
   //  if(key==0x76)//windows key
   if(key==0x73)//right contrl key
      super_toggle = super_toggle ? 0:1;
@@ -453,7 +470,7 @@ Init(){
 
 void
 reshape(int w,int h){
-  printf("reshape\n");
+  //  printf("reshape\n");
   WIDTH=glutGet(GLUT_WINDOW_WIDTH);
   HEIGHT=glutGet(GLUT_WINDOW_HEIGHT);
   vnc.set_key(0xffe9,0);
@@ -496,24 +513,8 @@ main(int argc, char *argv[]){
   glutDropFileFunc(dropfile);
   glutReshapeFunc(reshape);
 
-  // for(int i=1;i<argc;i++){
-  //   //    if(file_exist(argv[i])){
-  //     texidx=0;
-  //     tex.push_back(Texture(argv[i]));
-  //     //    }
-  // }
-
   //  glutSetCursor(GLUT_CURSOR_NONE);
   vnc.init(argv[1],atoi(argv[2]),argv[3]);
-  // texidx=0;
-  // BMPb b=vnc.get_display();
-  // b.write("snap.png");
-  // //  tex=Texture(vnc.get_display());
-  // tex.set(b);
-  //  vnc.set_display(1);
-  // vnc.get_display();
-  // tex.set(vnc.img);
-
   
   
   glutMainLoop();

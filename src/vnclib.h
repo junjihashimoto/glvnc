@@ -37,6 +37,7 @@ struct VNC_Client{
   Thread thread;
   Thread thread_read;
   int    exitp;
+  int    mode;
 
   Mutex  img_mutex;
   Mutex  set_mutex;
@@ -53,6 +54,7 @@ struct VNC_Client{
   int set_point(int x,int y,int button);
   int set_key(int key,int down);
   int set_cuttext(const std::string& text);
+  int set_mode(int mode);
   
   const BMPb& get_display();
   int         get_colormap();

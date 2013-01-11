@@ -139,9 +139,12 @@ THREAD_CALLBACK(run)(void* vncp){
 
       // tex.set(vnc.img);
       vnc.img_mutex.lock();
-      vnc.img2=vnc.img;
-      //facedetect(vnc.img,vnc.img2);
-      //houghlines(vnc.img,vnc.img2);
+      if(vnc.mode==0)
+	vnc.img2=vnc.img;
+      else if(vnc.mode==1)
+	facedetect(vnc.img,vnc.img2);
+      else
+	houghlines(vnc.img,vnc.img2);
       //vnc.img2.swap(vnc.img);
       vnc.img_mutex.unlock();
       
@@ -375,7 +378,9 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
   imgbuf=(uint8_t*)malloc(width*height*bits_per_pixel/8);
 
+  mode=0;
   set_display(0);
+  
   thread.run(this);
   thread_read.run(this);
   
@@ -383,8 +388,14 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 }
 
 int
-VNC_Client::set_display(int inc){
-
+VNC_Client::set_mode(int mode){
+  Lock lock(img_mutex);
+  this->mode=mode;
+  return mode;
+}
+int
+VNC_Client::set_display(int inc)
+{
   Lock lock(set_mutex);
   unsigned char array[]={
     0x3,

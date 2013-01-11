@@ -34,6 +34,7 @@ float picy=0;
 float scale=1.0f;
 float angle=0.0f;
 int   small=0;
+int   mode=0;
 
 float org_posx=0.0f;
 float org_posy=0.0f;
@@ -333,6 +334,10 @@ keydown(unsigned char key, int x, int y){
       break;
     case 's':
       small=small?0:1;
+      break;
+    case 'm':
+      mode=(mode+1)%3;
+      vnc.set_mode(mode);
       break;
     case 'f':
       fullscreen = !fullscreen;

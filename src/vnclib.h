@@ -32,19 +32,23 @@ struct VNC_Client{
   uint8_t* imgbuf;
   BMPb  img;
   BMPb  img2;
-  BMPb  img3;
+  BMPb  info_img;
+  BMPb  info_img2;
 
   Thread thread;
-  Thread thread_read;
+  
+  Thread thread_info;
   int    exitp;
   int    mode;
 
   Mutex  img_mutex;
   Mutex  set_mutex;
   Mutex  get_mutex;
+  
   Mutex  q_mutex;
   Cond   q_cond;
-  queue<Dat> que;
+  int    q_empty;
+  
 
   VNC_Client();
 

@@ -124,6 +124,7 @@ nto_uint16(unsigned char* buf){
 
 THREAD_CALLBACK(run)(void* vncp){
   VNC_Client& vnc=*(VNC_Client*)vncp;
+  int cycle=0;
   while(vnc.exitp==0){
     int mtype;
     {
@@ -137,16 +138,26 @@ THREAD_CALLBACK(run)(void* vncp){
     case 0:
       vnc.get_display();
 
+      
       // tex.set(vnc.img);
-      vnc.img_mutex.lock();
-      if(vnc.mode==0)
+      {
+	Lock lock(vnc.img_mutex);
 	vnc.img2=vnc.img;
-      else if(vnc.mode==1)
-	facedetect(vnc.img,vnc.img2);
-      else
-	houghlines(vnc.img,vnc.img2);
+      }
+
+      //      printf("pre2 hough:%d %d\n",vnc.q_empty,cycle);
+      if(cycle==0){
+	//	printf("pre hough\n");
+
+	Lock lock(vnc.q_mutex);
+	if(vnc.q_empty){
+	  vnc.info_img=vnc.img;
+	  vnc.q_empty=0;
+	  vnc.q_cond.notify();
+	}
+      }
+
       //vnc.img2.swap(vnc.img);
-      vnc.img_mutex.unlock();
       
       // tex.set(vnc.img);
       // glutPostRedisplay();
@@ -165,38 +176,48 @@ THREAD_CALLBACK(run)(void* vncp){
       assert(0);
       break;
     }
+    //  cycle=(cycle+1)%(3);
+    cycle=0;//(cycle+1)%(3);
   }
   
 }
 
 
-THREAD_CALLBACK(run_read)(void* vncp){
+THREAD_CALLBACK(run_info)(void* vncp){
   VNC_Client& vnc=*(VNC_Client*)vncp;
   while(vnc.exitp==0){
-    vector<Dat> d;
     {
       Lock lock(vnc.q_mutex);
-      while(vnc.que.empty()){
+      while(vnc.q_empty){
 	vnc.q_cond.wait(lock);
       }
-
-      while(!vnc.que.empty()){
-	d.push_back(vnc.que.front());
-	vnc.que.pop();
+    }
+    BMPb next_img(vnc.info_img.w,vnc.info_img.h);
+    {
+      if(vnc.mode==0){
+	memset((unsigned char*)next_img.rgb,0,4*next_img.w*next_img.h);
+      }else if(vnc.mode==1){
+	houghlines(vnc.info_img,next_img);
+      }else if(vnc.mode==2){
+	facedetect(vnc.info_img,next_img);
       }
     }
+    
     {
-      Lock lock2(vnc.set_mutex);
-      write(vnc.fd,d[d.size()-1].p,d[d.size()-1].len);
-
+      Lock lock(vnc.img_mutex);
+      vnc.info_img2=next_img;
     }
-    for(int i=0;i<d.size();i++)
-      free(d[i].p);
+
+    {
+      Lock lock(vnc.q_mutex);
+      vnc.q_empty=1;
+    }
+    
   }
 }
 
 
-VNC_Client::VNC_Client():thread(run),thread_read(run_read){
+VNC_Client::VNC_Client():thread(run),thread_info(run_info){
 }
 
 int
@@ -325,7 +346,8 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
   img.init(width,height);
   img2.init(width,height);
-  img3.init(width,height);
+  info_img.init(width,height);
+  info_img2.init(width,height);
 
   printf("%d %d %d %d %s\n",width,height,big_endian_flag,bits_per_pixel,buf);
 
@@ -381,8 +403,9 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   mode=0;
   set_display(0);
   
+  q_empty=1;
   thread.run(this);
-  thread_read.run(this);
+  thread_info.run(this);
   
   return 0;
 }
@@ -457,6 +480,7 @@ VNC_Client::get_display(){
 	  img(x+k,y+j)[0]=((v>>(red_shift))&(red_max))*(256)/(red_max+1);
 	  img(x+k,y+j)[1]=(v>>(green_shift))&(green_max)*(256)/(green_max+1);
 	  img(x+k,y+j)[2]=(v>>(blue_shift))&(blue_max)*(256)/(blue_max+1);
+	  img(x+k,y+j)[3]=255;
 	  idx+=2;
 	}
       }
@@ -475,6 +499,7 @@ VNC_Client::get_display(){
 	  img.rgb[x+k+img.w*(y+j)].b=imgbuf[idx];
 	  img.rgb[x+k+img.w*(y+j)].g=imgbuf[idx+1];
 	  img.rgb[x+k+img.w*(y+j)].r=imgbuf[idx+2];
+	  img.rgb[x+k+img.w*(y+j)].a=255;
 	  idx+=4;
 	}
       }
@@ -486,6 +511,7 @@ VNC_Client::get_display(){
 	  img(x+k,y+j)[0]=((v>>(red_shift))  &(red_max))  *(256)/(red_max+1);
 	  img(x+k,y+j)[1]=((v>>(green_shift))&(green_max))*(256)/(green_max+1);
 	  img(x+k,y+j)[2]=((v>>(blue_shift)) &(blue_max)) *(256)/(blue_max+1);
+	  img(x+k,y+j)[3]=255;
 	}
       }
     }else{
@@ -500,7 +526,7 @@ VNC_Client::get_display(){
 int
 VNC_Client::close(){
   exitp=1;
-  thread_read.join();
+  thread_info.join();
   thread.join();
   ::close(fd);
   free(imgbuf);
@@ -520,32 +546,6 @@ VNC_Client::set_point(int x,int y,int button){
   fsync(fd);
   return 0;
 }
-
-// int
-// VNC_Client::set_pointn(int x,int y,int button){
-//   //  Lock lock(set_mutex);
-//   unsigned char array[]={
-//     0x5,
-//     button,
-//     x>>8,x&0xff,
-//     y>>8,y&0xff
-//   };
-//   int len=sizeof(array);
-//   Dat d={(unsigned char*)malloc(len),len};
-//   memcpy((char*)d.p,(char*)array,len);
-//   assert(d.len==len);
-//   {
-//     Lock lock(q_mutex);
-//     que.push(d);
-//   }
-//   //  printf("push: %d %d\n",(int)array[2],(int)array[3]);
-//   q_cond.notify();
-//   // write8(5);//message-type
-//   // write8(button);//padding
-//   // write16(x);//num of encodings
-//   // write16(y);//Raw
-//   return 0;
-// }
 
 int
 VNC_Client::set_key(int key,int down){
@@ -594,7 +594,6 @@ VNC_Client::get_colormap(){
   
   return 0;
 }
-
 
 std::string
 VNC_Client::get_cuttext(){

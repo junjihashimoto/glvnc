@@ -15,6 +15,7 @@ template<class T> int operator ==(color<T>& a,color<T>& b);
 template<class T> int operator !=(color<T>& a,color<T>& b);
 
 typedef color<int> RGB;
+typedef color<unsigned char> RGBb;
 
 template<class T>
 void
@@ -32,7 +33,7 @@ color<T>::color(){
 
 template<class T>
 color<T>::color(T r,T g,T b,T a){
-  init(r,g,b);
+  init(r,g,b,a);
 }
 
 template<class T>

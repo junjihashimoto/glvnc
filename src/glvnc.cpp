@@ -47,6 +47,7 @@ MouseDat passive_mousedat;
 VNC_Client vnc;
 
 Texture tex;
+Texture info_tex;
 
 
 
@@ -124,8 +125,8 @@ display(void){
   glLoadIdentity();
   glOrtho(0.0, WIDTH, HEIGHT, 0.0, -1.0, 1.0);
 
-  Square(mousedat.x-1,mousedat.y-10,
-	 mousedat.x+1,mousedat.y+10);
+  // Square(mousedat.x-1,mousedat.y-10,
+  // 	 mousedat.x+1,mousedat.y+10);
 
   
   glPushMatrix();
@@ -145,15 +146,13 @@ display(void){
     
     glColor3ub(255,255,255);
     {
-      vnc.img_mutex.lock();
-      //      Lock(vnc.img_mutex);
-      
+      Lock lock(vnc.img_mutex);
       tex.set(vnc.img2);
-      vnc.img_mutex.unlock();
-	    
+      info_tex.set(vnc.info_img2);
     }
     glRotatef(angle,0.0f,0.0f,1.0f);
     tex.display();
+    info_tex.display();
   }
   glPopMatrix();
   
@@ -477,8 +476,9 @@ Init(){
   WIDTH=glutGet(GLUT_WINDOW_WIDTH);
   HEIGHT=glutGet(GLUT_WINDOW_HEIGHT);
   glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-  glEnable(GL_DEPTH_TEST);
+  //  glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void
@@ -506,7 +506,7 @@ main(int argc, char *argv[]){
   char *temp[2]={"vnclient",NULL};
   int num=1;
   glutInit(&num,temp);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB );
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA );
   glutInitWindowSize(INIT_WIDTH, INIT_HEIGHT);
   glutCreateWindow("vncclient");
   glutKeyboardFunc(keydown);

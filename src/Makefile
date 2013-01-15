@@ -49,3 +49,6 @@ bin/%$(EXE):obj/%.o $(LIBS) $(NPROG)
 	-if [ ! -d bin ] ; then mkdir bin ;fi
 	$(CXX) -o $@ $<  $(CFLAGS) $(NPROG) $(LIBS) $(OTHER_LIBS)
 #	cp ../bin/template ../$@
+
+#check-syntax:
+#	$(CXX)  $(CFLAGS)  -Wall -Wextra -pedantic -fsyntax-only $(CHK_SOURCES)

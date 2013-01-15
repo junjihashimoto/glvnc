@@ -19,6 +19,7 @@ copy(const BMPb& in,Mat& out){
   bmp_for(in)
     out.at<Vec3b>(y,x)={in(x,y,2),in(x,y,1),in(x,y,0)};
 }
+
 void
 copy(const Mat& in,BMPb& out){
   bmp_for(out){
@@ -30,11 +31,25 @@ copy(const Mat& in,BMPb& out){
 }
 
 void
+copy_alpha(const Mat& in,BMPb& out){
+  bmp_for(out){
+    Vec3b p=in.at<Vec3b>(y,x);
+    if(p.val[0]||p.val[1]||p.val[2])
+      out(x,y,3)=255;
+    else
+      out(x,y,3)=0;
+    out(x,y,2)=p.val[0];
+    out(x,y,1)=p.val[1];
+    out(x,y,0)=p.val[2];
+  }
+}
+
+void
 facedetect(const BMPb& in,BMPb& out){
   Mat img(in.h,in.w,CV_8UC3);
   copy(in,img);
   facedetect(img);
-  copy(img,out);
+  copy_alpha(img,out);
 }
 
 
@@ -43,7 +58,7 @@ houghlines(const BMPb& in,BMPb& out){
   Mat img(in.h,in.w,CV_8UC3);
   copy(in,img);
   HoughLines(img);
-  copy(img,out);
+  copy_alpha(img,out);
 }
 
 
@@ -99,6 +114,10 @@ facedetect(Mat& img){
                            CV_HAAR_SCALE_IMAGE,
                            Size(5, 5));
 
+  for(int c=0;c<img.cols;c++)
+    for(int r=0;r<img.rows;r++)
+      img.at<Vec3b>(r,c)={0,0,0};
+  
   // 結果の描画
   std::vector<Rect>::const_iterator r = faces.begin();
   for(; r != faces.end(); ++r) {
@@ -109,6 +128,9 @@ facedetect(Mat& img){
     radius = saturate_cast<int>((r->width + r->height)*0.25*scale);
     circle( img, center, radius, Scalar(80,80,255), 3, 8, 0 );
   }
+
+
+  
 }
 
 
@@ -127,6 +149,12 @@ HoughLines(Mat& src_img){
   HoughLinesP(work_img, lines, 1, CV_PI/180, 50, 50, 10);
 
   std::vector<Vec4i>::iterator it = lines.begin();
+  
+  for(int c=0;c<src_img.cols;c++)
+    for(int r=0;r<src_img.rows;r++)
+      src_img.at<Vec3b>(r,c)={0,0,0};
+
+  
   for(; it!=lines.end(); ++it) {
     Vec4i l = *it;
     line(src_img, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 2, CV_AA);

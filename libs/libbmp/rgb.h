@@ -4,9 +4,10 @@ struct color{
   T r;
   T g;
   T b;
-  void init(T r,T g,T b);
+  T a;
+  void init(T r,T g,T b,T a);
   color();
-  color(T r,T g,T b);
+  color(T r,T g,T b,T a);
   T& operator[](int k);
 };
 
@@ -17,19 +18,20 @@ typedef color<int> RGB;
 
 template<class T>
 void
-color<T>::init(T r,T g,T b){
+color<T>::init(T r,T g,T b,T a){
   this->r=r;
   this->g=g;
   this->b=b;
+  this->a=a;
 }
 
 template<class T>
 color<T>::color(){
-  init(0,0,0);
+  init(0,0,0,0);
 }
 
 template<class T>
-color<T>::color(T r,T g,T b){
+color<T>::color(T r,T g,T b,T a){
   init(r,g,b);
 }
 
@@ -41,8 +43,10 @@ color<T>::operator[](int k){
     return r;
   case 1:
     return g;
-  default:
+  case 2:
     return b;
+  default:
+    return a;
   }
 }
 
@@ -53,7 +57,9 @@ operator ==(color<T>& a,color<T>& b){
   return
     a.r==b.r &&
     a.g==b.g &&
-    a.b==b.b;
+    a.b==b.b &&
+    a.a==b.a
+  ;
 }
 
 template<class T>
@@ -62,5 +68,7 @@ operator !=(color<T>& a,color<T>& b){
   return
     !(a.r==b.r &&
       a.g==b.g &&
-      a.b==b.b);
+      a.b==b.b &&
+      a.a==b.a
+      );
 }

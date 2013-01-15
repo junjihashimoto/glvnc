@@ -461,6 +461,7 @@ Bitmap<T>::readPng(const char* file){
     rgb[i][0]=p[i*3];
     rgb[i][1]=p[i*3+1];
     rgb[i][2]=p[i*3+2];
+    rgb[i][3]=0;
   }
 
   free(t);
@@ -515,6 +516,7 @@ Bitmap<T>::readJpeg(const char* file){
       rgb[i*width+j].r=img[i][j * 3 + 0];
       rgb[i*width+j].g=img[i][j * 3 + 1];
       rgb[i*width+j].b=img[i][j * 3 + 2];
+      rgb[i*width+j].a=0;
     }
   }
 

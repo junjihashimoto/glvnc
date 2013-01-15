@@ -39,7 +39,7 @@ public:
   Texture();
   Texture(const Texture& tex);
   ~Texture();
-  void getcolor(int x,int y,int& r,int& g,int& b);
+  void getcolor(int x,int y,int& r,int& g,int& b,int& a);
   void set(const BMPb& bmp);
   void set(const char* file);
 

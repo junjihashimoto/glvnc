@@ -9,8 +9,8 @@ Texture::Texture(const Texture& tex):data(NULL){
   texture=tex.texture;
   texturep=1;
   filename=tex.filename;
-  data=(unsigned char*)malloc(sizeX*sizeY*3);
-  memcpy(data,tex.data,sizeX*sizeY*3);
+  data=(unsigned char*)malloc(sizeX*sizeY*4);
+  memcpy(data,tex.data,sizeX*sizeY*4);
 }
 Texture::~Texture(){
   if(data!=NULL){
@@ -18,13 +18,13 @@ Texture::~Texture(){
     data=NULL;
   }
 }
-void Texture::getcolor(int x,int y,int& r,int& g,int& b){
-  int align=(sizeX*3)%4==0? 0 : 4-((sizeX*3)%4);
+void Texture::getcolor(int x,int y,int& r,int& g,int& b,int& a){
   if(0<=x&&x<sizeX&&
      0<=y&&y<sizeY){
-    r=data[x*3+y*(3*sizeX+align)+0];
-    g=data[x*3+y*(3*sizeX+align)+1];
-    b=data[x*3+y*(3*sizeX+align)+2];
+    r=data[x*4+y*(4*sizeX)+0];
+    g=data[x*4+y*(4*sizeX)+1];
+    b=data[x*4+y*(4*sizeX)+2];
+    a=data[x*4+y*(4*sizeX)+3];
   }
 }
 void Texture::set(const BMPb& bmp){
@@ -34,19 +34,13 @@ void Texture::set(const BMPb& bmp){
   if(sizeX==0||sizeY==0)
     return;
   //    sizeX=sizeX%4 == 0 ? sizeX : (4-(sizeX%4))+sizeX;
-  int align=(sizeX*3)%4==0? 0 : 4-((sizeX*3)%4);
 
     
   if(data==NULL){
     data=NULL;
-    data=(unsigned char*)malloc(sizeof(unsigned char)*(sizeX+align)*bmp.h*3);
+    data=(unsigned char*)malloc(sizeof(unsigned char)*bmp.w*bmp.h*4);
   }
-  if(align==0&&(sizeof(bmp.rgb[0])==3)){
-    //      memcpy(data,bmp.rgb,3*sizeX*sizeY);
-  }else{
-    bmp_for3(bmp)
-      data[x*3+y*(3*(sizeX)+align)+z]=bmp(x,y,z);
-  }
+  //  memcpy(data,bmp.rgb,4*sizeX*sizeY);
   //    glEnable( GL_TEXTURE_RECTANGLE_ARB );
   if(!texturep){
     glGenTextures( 1, &texture );
@@ -55,17 +49,14 @@ void Texture::set(const BMPb& bmp){
   glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texture );
   //  glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-  //  glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
   /* glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST ); */
-  glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+  //glTexParameterf( GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
   //       printf("align %d\n",align);
        
-  if(align==0&&(sizeof(bmp.rgb[0])==3)){
-    //      memcpy(data,bmp.rgb,3*sizeX*sizeY);
-    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, bmp.rgb );
-  }else{
-    glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
-  }
+  //      memcpy(data,bmp.rgb,3*sizeX*sizeY);
+  glTexImage2D( GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, sizeX, sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, bmp.rgb );
+
   //    glBindTexture( GL_TEXTURE_RECTANGLE_ARB, 0 );
   //    glDisable(GL_TEXTURE_RECTANGLE_ARB);//テクスチャ無効
 }
@@ -91,8 +82,8 @@ Texture::operator = (const Texture& tex){
   texture=tex.texture;
   texturep=1;
   filename=tex.filename;
-  data=(unsigned char*)malloc(sizeX*sizeY*3);
-  memcpy(data,tex.data,sizeX*sizeY*3);
+  data=(unsigned char*)malloc(sizeX*sizeY*4);
+  memcpy(data,tex.data,sizeX*sizeY*4);
   return *this;
 }
   
@@ -101,7 +92,7 @@ void Texture::display(){
     return;
   glEnable(GL_TEXTURE_RECTANGLE_ARB);//テクスチャ有効
   glBindTexture( GL_TEXTURE_RECTANGLE_ARB, texture );
-  //    glEnable(GL_ALPHA_TEST);//アルファテスト開始
+  glEnable(GL_ALPHA_TEST);//アルファテスト開始
   //    glBegin(GL_POLYGON);
   glBegin(GL_QUADS);
   /* glTexCoord2f(0.0f, 0.0f); glVertex2d(0 , sizeY);//左下 */
@@ -132,6 +123,6 @@ void Texture::display(){
   /* glTexCoord2f(1.0f, 0.0f); glVertex2d( sizeX ,  0);//右上 */
   /* glTexCoord2f(0.0f, 0.0f); glVertex2d( sizeX , sizeY);//右下 */
   glEnd();
-  //    glDisable(GL_ALPHA_TEST);//アルファテスト終了
+  glDisable(GL_ALPHA_TEST);//アルファテスト終了
   glDisable(GL_TEXTURE_RECTANGLE_ARB);//テクスチャ無効
 }

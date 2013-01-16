@@ -368,8 +368,14 @@ void
 skeydown(int key, int x, int y){
   // printf("skey down:%d\n",(int)key);
   //  if(key==0x76)//windows key
-  if(key==0x73)//right contrl key
-     super_toggle = super_toggle ? 0:1;
+  if(key==0x73){//right contrl key
+    super_toggle = super_toggle ? 0:1;
+    if(super_toggle)
+      glutSetCursor(GLUT_CURSOR_NONE);
+    else
+      glutSetCursor(GLUT_CURSOR_INHERIT);
+      
+  }
   // //  printf("super_togle %d\n",super_toggle);
   if(super_toggle){
     vncskey(key,1);
@@ -524,7 +530,6 @@ main(int argc, char *argv[]){
   glutDropFileFunc(dropfile);
   glutReshapeFunc(reshape);
 
-  //  glutSetCursor(GLUT_CURSOR_NONE);
   vnc.init(argv[1],atoi(argv[2]),argv[3]);
   
   

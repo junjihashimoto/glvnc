@@ -37,7 +37,7 @@ extern "C"{
 
 #else
 
-#define closesocket(socket) close(socket)
+#define closesocket(socket) ::close(socket)
 #define socket_init()  
 #define socket_finish()  
 
@@ -191,7 +191,12 @@ THREAD_CALLBACK(run)(void* vncp){
       printf("bell\n");
       break;
     case 3:
-      printf("clip board:%s\n",vnc.get_cuttext().c_str());
+      {
+	string str=vnc.get_cuttext();
+	printf("clip board:%s\n",str.c_str());
+	if(vnc.get_cuttext_callback)
+	  vnc.get_cuttext_callback((VNC_Client*)vncp,str);
+      }
       break;
     default:
       assert(0);
@@ -240,6 +245,8 @@ THREAD_CALLBACK(run_info)(void* vncp){
 
 
 VNC_Client::VNC_Client():thread(run),thread_info(run_info){
+  get_cuttext_callback=NULL;
+
 }
 
 int

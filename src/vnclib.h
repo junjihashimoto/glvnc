@@ -67,11 +67,12 @@ struct VNC_Client{
   int set_key(int key,int down);
   int set_cuttext(const std::string& text);
   int set_mode(int mode);
+
+  void (*get_cuttext_callback)(VNC_Client*,const string& str);
   
   const BMPb& get_display();
   int         get_colormap();
   /* int         get_bell(); */
   std::string get_cuttext();
-
 };
 

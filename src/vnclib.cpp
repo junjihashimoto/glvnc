@@ -7,12 +7,17 @@
 extern "C"{
 #include <stdint.h>
 #include <sys/types.h>
+#ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#else
+#include <winsock2.h>
+#define HAVE_BOOLEAN
+#endif
 }
 #include "glcommon.h"
 
@@ -22,8 +27,24 @@ extern "C"{
 #include "filter.h"
 
 
+#ifdef WIN32
+
+#define read(socket,buf,len) recv(socket,(char*)buf,len,0)
+#define write(socket,buf,len) send(socket,(char*)buf,len,0)
+#define fsync(socket)
+#define socket_init()   {WSADATA wsaData;WSAStartup(MAKEWORD(2,0), &wsaData);}
+#define socket_finish() WSACleanup()
+
+#else
+
+#define closesocket(socket) close(socket)
+#define socket_init()  
+#define socket_finish()  
+
+#endif
+
 void
-myread(int fd,unsigned char* buf,int n) {
+myread(SOCKET fd,unsigned char* buf,int n) {
   int total=0;
   while(total!=n){
     int v;
@@ -129,7 +150,7 @@ THREAD_CALLBACK(run)(void* vncp){
     int mtype;
     {
       unsigned char buf[1];
-      int s=read(vnc.fd,buf,1);
+      int s=read(vnc.fd,(char*)buf,1);
       assert(s==1);
       mtype=buf[0];
     }
@@ -194,13 +215,14 @@ THREAD_CALLBACK(run_info)(void* vncp){
     }
     BMPb next_img(vnc.info_img.w,vnc.info_img.h);
     {
-      if(vnc.mode==0){
+      if(vnc.mode==0)
 	memset((unsigned char*)next_img.rgb,0,4*next_img.w*next_img.h);
-      }else if(vnc.mode==1){
+#ifndef WIN32
+      else if(vnc.mode==1)
 	houghlines(vnc.info_img,next_img);
-      }else if(vnc.mode==2){
+      else if(vnc.mode==2)
 	facedetect(vnc.info_img,next_img);
-      }
+#endif
     }
     
     {
@@ -224,6 +246,7 @@ int
 VNC_Client::init(const std::string& server,int port,const std::string& pass){
   int r;
   exitp=0;
+  socket_init();
   
   fd=socket(AF_INET,SOCK_STREAM,0);
   //  int port=5901;
@@ -253,7 +276,7 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
 
   int one = 1;
-  setsockopt(fd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));  
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof(one));  
   assert(r>=0);
 
   unsigned char buf[1024];
@@ -528,8 +551,10 @@ VNC_Client::close(){
   exitp=1;
   thread_info.join();
   thread.join();
-  ::close(fd);
+  closesocket(fd);
   free(imgbuf);
+  socket_finish();
+  
   return 0;
 }
 

@@ -1,3 +1,5 @@
+#ifndef WIN32
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
@@ -276,3 +278,5 @@ get_num_cams(){
       return device;          
   }
 }
+#endif
+

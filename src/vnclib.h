@@ -4,13 +4,21 @@
 using namespace std;
 #include "thread.h"
 
+#ifndef WIN32
+#define SOCKET int
+#else
+#include <winsock2.h>
+#endif
+
+
+
 struct Dat{
   unsigned char* p;
   int   len;
 };
 
 struct VNC_Client{
-  int fd;
+  SOCKET fd;
   int width;//2
   int height;//2
   int bits_per_pixel;//1

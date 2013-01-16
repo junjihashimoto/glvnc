@@ -97,6 +97,12 @@ void FGAPIENTRY glutDropFileFunc( void (* callback)(const char* ) )
     fgState.DropFileCallback = callback;
 }
 
+void FGAPIENTRY glutGetClipboardFunc( void (* callback)(const char* ) )
+{
+    FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutGetClipboardFunc" );
+    fgState.GetClipboardCallback = callback;
+}
+
 
 /*
  * Sets the Timer callback for the current window

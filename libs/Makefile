@@ -10,12 +10,13 @@ thread \
 utils
 
 
-# ifndef WIN32
-# SUBDIRS+=matrix
-# else
-# SUBDIRS+=blas
-# SUBDIRS+=lapack
-# endif
+ifndef WIN32
+#SUBDIRS+=matrix
+else
+SUBDIRS+=libjpeg
+SUBDIRS+=libpng
+SUBDIRS+=zlib
+endif
 
 
 

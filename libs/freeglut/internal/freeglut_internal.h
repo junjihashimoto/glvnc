@@ -95,7 +95,7 @@
 #if TARGET_HOST_MS_WINDOWS && !defined(_WIN32_WCE)
 #    include <windows.h>
 #    include <windowsx.h>
-//#    include <shellapi.h>
+#    include <shellapi.h>
 #    include <mmsystem.h>
 /* CYGWIN does not have tchar.h, but has TEXT(x), defined in winnt.h. */
 #    ifndef __CYGWIN__
@@ -252,6 +252,7 @@ typedef void (* FGCBMenuState     )( int );
 typedef void (* FGCBMenuStatus    )( int, int, int );
 
 typedef void (* FGCBDropFile      )( const char* );
+typedef void (* FGCBGetClipboard      )( const char* );
 
 
 /* The callback used when creating/using menus */
@@ -329,6 +330,8 @@ struct tagSFG_State
     FGCBIdle         IdleCallback;         /* The global idle callback       */
 
     FGCBDropFile     DropFileCallback;         /* The global idle callback       */
+
+    FGCBGetClipboard GetClipboardCallback;         /* The global idle callback       */
 
     int              ActiveMenus;          /* Num. of currently active menus */
     FGCBMenuState    MenuStateCallback;    /* Menu callbacks are global      */

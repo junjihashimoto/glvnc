@@ -95,6 +95,7 @@ static GLUTproc fghGetGLUTProcAddress( const char* procName )
     CHECK_NAME(glutVisibilityFunc);
     CHECK_NAME(glutIdleFunc);
     CHECK_NAME(glutDropFileFunc);
+    CHECK_NAME(glutGetClipboardFunc);
     CHECK_NAME(glutTimerFunc);
     CHECK_NAME(glutMenuStateFunc);
     CHECK_NAME(glutSpecialFunc);

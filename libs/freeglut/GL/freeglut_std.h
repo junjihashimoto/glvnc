@@ -401,6 +401,7 @@ FGAPI void    FGAPIENTRY glutInitDisplayString( const char* displayMode );
  * Process loop function, see freeglut_main.c
  */
 FGAPI void    FGAPIENTRY glutMainLoop( void );
+FGAPI void    FGAPIENTRY glutSetClipboard(const char* str);
 
 /*
  * Window management functions, see freeglut_window.c
@@ -466,6 +467,7 @@ FGAPI void    FGAPIENTRY glutDetachMenu( int button );
 FGAPI void    FGAPIENTRY glutTimerFunc( unsigned int time, void (* callback)( int ), int value );
 FGAPI void    FGAPIENTRY glutIdleFunc( void (* callback)( void ) );
 FGAPI void    FGAPIENTRY glutDropFileFunc( void (* callback)( const char* file ) );
+FGAPI void    FGAPIENTRY glutGetClipboardFunc( void (* callback)( const char* str ) );
 
 /*
  * Window-specific callback functions, see freeglut_callbacks.c

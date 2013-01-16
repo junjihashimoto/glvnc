@@ -1945,6 +1945,9 @@ static int fghGetWin32Modifiers (void)
 	( GetKeyState( VK_RMENU    ) < 0 )) ? GLUT_ACTIVE_ALT   : 0 );
 }
 
+
+HWND hNextWnd;
+
 /*
  * The window procedure for handling Win32 events
  */
@@ -2154,6 +2157,9 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 	  fgSetWindow( current_window );
         }
 
+      if(fgState.GetClipboardCallback)
+	hNextWnd = SetClipboardViewer(hWnd);
+
       ReleaseDC( window->Window.Handle, window->Window.Device );
 
 #if defined(_WIN32_WCE)
@@ -2174,18 +2180,28 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 
 #endif /* defined(_WIN32_WCE) */
       break;
+    case WM_DRAWCLIPBOARD:
+      if( fgState.GetClipboardCallback){
+	HANDLE hg;
+	if(OpenClipboard(hWnd) && (hg = GetClipboardData(CF_TEXT))){
+	  PTSTR   strText = (PTSTR)GlobalLock(hg);
+	  fgState.GetClipboardCallback(strText);
+	  GlobalUnlock(hg);
+	  CloseClipboard();
+	}
+      }
+      break;
 
     case WM_DROPFILES:
-      //SetForegroundWindow(hWnd); // 他のスレッドよりも若干高い優先順位を割り当て
       if( fgState.DropFileCallback) {
 	int i, max;
 	char* file=(char*)malloc(1024);
-	for( i=0, max=DragQueryFile( (HDROP)wParam, -1, NULL, 0 ); i<max; i++ ) {
-	  DragQueryFile( (HDROP)wParam, i, file,1024 ) ;
+	for( i=0, max=DragQueryFile( (WORD)wParam, -1, NULL, 0 ); i<max; i++ ) {
+	  DragQueryFile( (WORD)wParam, i, file,1024 ) ;
 	  fgState.DropFileCallback( file ) ;
 	}
 	free(file);
-	DragFinish((HDROP)wParam);
+	DragFinish((WORD)wParam);
       }else{
 	goto SWITCH_DEFAULT;
       }
@@ -2273,6 +2289,8 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
       /*
        * The window already got destroyed, so don't bother with it.
        */
+      if(fgState.GetClipboardCallback)
+	ChangeClipboardChain(hWnd, hNextWnd);
       return 0;
 
     case WM_MOUSEMOVE:
@@ -2876,6 +2894,25 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 
   return lRet;
 }
+
 #endif
+
+void  FGAPIENTRY glutSetClipboard(const char* str){
+#if TARGET_HOST_MS_WINDOWS
+  HANDLE hg;
+  if (!OpenClipboard(NULL)) return 0;
+  EmptyClipboard();
+
+  hg = GlobalAlloc(GHND | GMEM_SHARE , 128);
+  PTSTR strMem = (PTSTR)GlobalLock(hg);
+  lstrcpy(strMem , str);
+  GlobalUnlock(hg);
+
+  SetClipboardData(CF_TEXT , hg);
+
+  CloseClipboard();
+#endif
+}
+
 
 /*** END OF FILE ***/

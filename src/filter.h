@@ -1,3 +1,4 @@
+#ifndef WIN32
 #include <bmp.h>
 
 
@@ -17,3 +18,4 @@ struct Camera{
 };
 
 extern int get_num_cams();
+#endif

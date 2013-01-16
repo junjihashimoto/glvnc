@@ -75,6 +75,7 @@ SFG_State fgState = { { -1, -1, GL_FALSE },  /* Position */
                       { NULL, NULL },         /* FreeTimers */
                       NULL,                   /* IdleCallback */
                       NULL,                   /* DropFileCallback */
+                      NULL,                   /* GetClipboardCallback */
                       0,                      /* ActiveMenus */
                       NULL,                   /* MenuStateCallback */
                       NULL,                   /* MenuStatusCallback */
@@ -494,6 +495,7 @@ void fgDeinitialize( void )
 
     fgState.IdleCallback = NULL;
     fgState.DropFileCallback = NULL;
+    fgState.GetClipboardCallback = NULL;
     fgState.MenuStateCallback = ( FGCBMenuState )NULL;
     fgState.MenuStatusCallback = ( FGCBMenuStatus )NULL;
 

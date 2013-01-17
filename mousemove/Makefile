@@ -21,25 +21,20 @@ OBJS=$(TOBJS:%.cpp=obj/%.o)
 HEADERS=$(shell find .. -name '*.h')
 
 CFLAGS+=-I../libs/libbmp
-CFLAGS+=-I../libs/utils
-CFLAGS+=-I../libs/freeglut -DFREEGLUT_STATIC
 CFLAGS+=-I../libs/thread
 CFLAGS+=-I../libs/vnc
 
-OTHER_LIBS= ../libs/freeglut/libglut.a
 OTHER_LIBS+= ../libs/vnc/libvnc.a
 
 ifdef WIN32
 OTHER_LIBS+= ../libs/libjpeg/libjpeg.a
 OTHER_LIBS+= ../libs/libpng/libpng.a
 OTHER_LIBS+= ../libs/zlib/libz.a
-OTHER_LIBS+= -lopengl32 -lglu32 -lwinmm -lgdi32 -lws2_32 -lshell32 -lm
+OTHER_LIBS+=  -lws2_32 -lshell32 -lm
 CFLAGS+=-I../libs/libjpeg -I../libs/libpng -I../libs/zlib
 
 else
-OTHER_LIBS+= -lGL -lGLU -lm -ldl -lXrandr -lXxf86vm
-OTHER_LIBS+= -llapack  -latlas -lblas -lgfortran
-OTHER_LIBS+= -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect -lopencv_video
+OTHER_LIBS+= -lm -ldl
 endif
 
 

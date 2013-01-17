@@ -144,8 +144,8 @@ display(void){
     glColor3ub(255,255,255);
     {
       Lock lock(vnc.img_mutex);
-      tex.set(vnc.img2);
-      info_tex.set(vnc.info_img2);
+      tex.set(vnc.img);
+      info_tex.set(vnc.info_img);
     }
     glRotatef(angle,0.0f,0.0f,1.0f);
     tex.display();
@@ -159,9 +159,10 @@ display(void){
     {
       glScalef(0.2,0.2,0.2);
       glColor3ub(255,255,255);
-      vnc.img_mutex.lock();
-      tex.set(vnc.img2);
-      vnc.img_mutex.unlock();
+      {
+	Lock lock(vnc.img_mutex);
+	tex.set(vnc.img);
+      }
       tex.display();
     }
     glPopMatrix();

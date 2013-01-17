@@ -162,25 +162,19 @@ THREAD_CALLBACK(run)(void* vncp){
       // tex.set(vnc.img);
       {
 	Lock lock(vnc.img_mutex);
-	vnc.img2=vnc.img;
+	vnc.img=vnc.img_buf;
       }
 
       //      printf("pre2 hough:%d %d\n",vnc.q_empty,cycle);
       if(cycle==0){
 	//	printf("pre hough\n");
-
 	Lock lock(vnc.q_mutex);
 	if(vnc.q_empty){
-	  vnc.info_img=vnc.img;
+	  vnc.info_img_buf=vnc.img_buf;
 	  vnc.q_empty=0;
 	  vnc.q_cond.notify();
 	}
       }
-
-      //vnc.img2.swap(vnc.img);
-      
-      // tex.set(vnc.img);
-      // glutPostRedisplay();
       vnc.set_display(1);
       break;
     case 1:
@@ -210,6 +204,8 @@ THREAD_CALLBACK(run)(void* vncp){
 
 THREAD_CALLBACK(run_info)(void* vncp){
   VNC_Client& vnc=*(VNC_Client*)vncp;
+  BMPb next_img;
+  
   while(vnc.exitp==0){
     {
       Lock lock(vnc.q_mutex);
@@ -217,13 +213,13 @@ THREAD_CALLBACK(run_info)(void* vncp){
 	vnc.q_cond.wait(lock);
       }
     }
-    BMPb next_img(vnc.info_img.w,vnc.info_img.h);
+    next_img.init(vnc.info_img_buf.w,vnc.info_img_buf.h);
     if(vnc.img_filter_callback)
-      vnc.img_filter_callback((VNC_Client*)vncp,vnc.info_img,next_img);
+      vnc.img_filter_callback((VNC_Client*)vncp,vnc.info_img_buf,next_img);
     
     {
       Lock lock(vnc.img_mutex);
-      vnc.info_img2=next_img;
+      vnc.info_img=next_img;
     }
 
     {
@@ -366,10 +362,10 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   read32(name_length);
   readn(name_length);
 
+  img_buf.init(width,height);
   img.init(width,height);
-  img2.init(width,height);
+  info_img_buf.init(width,height);
   info_img.init(width,height);
-  info_img2.init(width,height);
 
   printf("%d %d %d %d %s\n",width,height,big_endian_flag,bits_per_pixel,buf);
 
@@ -499,10 +495,10 @@ VNC_Client::get_display(){
 	for(int k=0;k<w;k++){
 	  uint8_t* t=(uint8_t*)(imgbuf+idx);
 	  unsigned short v=(t[1]<<8)|t[0];
-	  img(x+k,y+j)[0]=((v>>(red_shift))&(red_max))*(256)/(red_max+1);
-	  img(x+k,y+j)[1]=(v>>(green_shift))&(green_max)*(256)/(green_max+1);
-	  img(x+k,y+j)[2]=(v>>(blue_shift))&(blue_max)*(256)/(blue_max+1);
-	  img(x+k,y+j)[3]=255;
+	  img_buf(x+k,y+j)[0]=((v>>(red_shift))&(red_max))*(256)/(red_max+1);
+	  img_buf(x+k,y+j)[1]=(v>>(green_shift))&(green_max)*(256)/(green_max+1);
+	  img_buf(x+k,y+j)[2]=(v>>(blue_shift))&(blue_max)*(256)/(blue_max+1);
+	  img_buf(x+k,y+j)[3]=255;
 	  idx+=2;
 	}
       }
@@ -518,10 +514,10 @@ VNC_Client::get_display(){
       int idx=0;
       for(int j=0;j<h;j++){
 	for(int k=0;k<w;k++){
-	  img.rgb[x+k+img.w*(y+j)].b=imgbuf[idx];
-	  img.rgb[x+k+img.w*(y+j)].g=imgbuf[idx+1];
-	  img.rgb[x+k+img.w*(y+j)].r=imgbuf[idx+2];
-	  img.rgb[x+k+img.w*(y+j)].a=255;
+	  img_buf.rgb[x+k+img_buf.w*(y+j)].b=imgbuf[idx];
+	  img_buf.rgb[x+k+img_buf.w*(y+j)].g=imgbuf[idx+1];
+	  img_buf.rgb[x+k+img_buf.w*(y+j)].r=imgbuf[idx+2];
+	  img_buf.rgb[x+k+img_buf.w*(y+j)].a=255;
 	  idx+=4;
 	}
       }
@@ -530,17 +526,17 @@ VNC_Client::get_display(){
 	for(int k=0;k<w;k++){
 	  int idx=(w*j+k)*4;
 	  uint32_t v=*(uint32_t*)(imgbuf+idx);
-	  img(x+k,y+j)[0]=((v>>(red_shift))  &(red_max))  *(256)/(red_max+1);
-	  img(x+k,y+j)[1]=((v>>(green_shift))&(green_max))*(256)/(green_max+1);
-	  img(x+k,y+j)[2]=((v>>(blue_shift)) &(blue_max)) *(256)/(blue_max+1);
-	  img(x+k,y+j)[3]=255;
+	  img_buf(x+k,y+j)[0]=((v>>(red_shift))  &(red_max))  *(256)/(red_max+1);
+	  img_buf(x+k,y+j)[1]=((v>>(green_shift))&(green_max))*(256)/(green_max+1);
+	  img_buf(x+k,y+j)[2]=((v>>(blue_shift)) &(blue_max)) *(256)/(blue_max+1);
+	  img_buf(x+k,y+j)[3]=255;
 	}
       }
     }else{
       assert(0);
     }
   }
-  return img;
+  return img_buf;
 }
 
 

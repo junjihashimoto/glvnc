@@ -38,10 +38,10 @@ struct VNC_Client{
   int vnc_minor_ver;
 
   uint8_t* imgbuf;
+  BMPb  img_buf;
   BMPb  img;
-  BMPb  img2;
+  BMPb  info_img_buf;
   BMPb  info_img;
-  BMPb  info_img2;
 
   Thread thread;
   

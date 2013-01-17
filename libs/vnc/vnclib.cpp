@@ -7,40 +7,74 @@
 extern "C"{
 #include <stdint.h>
 #include <sys/types.h>
+#ifndef WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#else
+#include <winsock2.h>
+#define HAVE_BOOLEAN
+#endif
 }
+//#include "glcommon.h"
 
 #include "d3des.h"
-#include <bmp.h>
-#include "utils.h"
 #include "vnclib.h"
-#include "filter.h"
 
+using namespace std;
+
+#ifdef WIN32
+
+#define read(socket,buf,len) recv(socket,(char*)buf,len,0)
+#define write(socket,buf,len) send(socket,(char*)buf,len,0)
+#define fsync(socket)
+#define socket_init()   {WSADATA wsaData;WSAStartup(MAKEWORD(2,0), &wsaData);}
+#define socket_finish() WSACleanup()
+
+#else
+
+#define closesocket(socket) ::close(socket)
+#define socket_init()  
+#define socket_finish()  
+
+#endif
+
+void
+myread(SOCKET fd,unsigned char* buf,int n) {
+  int total=0;
+  while(total!=n){
+    int v;
+    total+=(v=read(fd,buf+total,n-total));
+    assert(v>=0);
+  }
+}
 
 
 
 #define read8(val) {				\
     unsigned char buf[1];			\
-    int s=read(fd,buf,1);				\
+    int s=read(fd,buf,1);			\
     assert(s==1);				\
     val=buf[0];					\
   }
+
 #define read16(val) {				\
     unsigned char buf[2];			\
-    int s=read(fd,buf,2);				\
-    assert(s==2);				\
+    myread(fd,buf,2);                            \
     val=nto_uint16(buf);			\
   }
+
 #define read32(val) {				\
     unsigned char buf[4];			\
-    int s=read(fd,buf,4);				\
-    assert(s==4);				\
+    myread(fd,buf,4);                            \
     val=nto_uint32(buf);			\
   }
+
+
+
 #define readn(len) {				\
     unsigned char buf[1024];			\
     int s=read(fd,buf,len);				\
@@ -70,72 +104,6 @@ extern "C"{
     int s=write(fd,buf,4);				\
     assert(s==4);				\
   }
-
-std::string
-trimword(const std::string& str){
-  std::string s;
-  int i;
-  for(i=0;i<str.length();i++){
-    if(str[i]!=' '&&
-       str[i]!='('&&
-       str[i]!=':'&&
-       str[i]!='\n'&&
-       str[i]!='\r'&&
-       str[i]!='\t')
-      break;
-  }
-  
-  for(;i<str.length();i++){
-    if(str[i]==' '||
-       str[i]=='('||
-       str[i]==':'||
-       str[i]=='\n'||
-       str[i]=='\r'||
-       str[i]=='\t')
-      break;
-    s+=str[i];
-  }
-    
-  return s;
-}
-
-std::string
-trimline(const std::string& str){
-  std::string s;
-  int i;
-  for(i=0;i<str.length();i++){
-    if(str[i]!=' '&&
-       str[i]!='('&&
-       str[i]!=':'&&
-       str[i]!='\n'&&
-       str[i]!='\r'&&
-       str[i]!='\t')
-      break;
-  }
-  
-  for(;i<str.length();i++){
-    if(str[i]=='\n'||
-       str[i]=='\r')
-      break;
-    s+=str[i];
-  }
-    
-  return s;
-}
-
-std::string
-chomp(const std::string& str){
-  std::string s;
-  int i=0;
-  for(;i<str.length();i++){
-    if(str[i]=='\n'||
-       str[i]=='\r')
-      break;
-    s+=str[i];
-  }
-    
-  return s;
-}
 
 void
 vncEncryptBytes(unsigned char *bytes,const  char *passwd){
@@ -176,40 +144,44 @@ nto_uint16(unsigned char* buf){
 
 THREAD_CALLBACK(run)(void* vncp){
   VNC_Client& vnc=*(VNC_Client*)vncp;
+  int cycle=0;
   while(vnc.exitp==0){
     int mtype;
     {
       unsigned char buf[1];
-      int s=read(vnc.fd,buf,1);
+      int s=read(vnc.fd,(char*)buf,1);
       assert(s==1);
       mtype=buf[0];
-      printf("mtypes:%d\n",mtype);
     }
     //    printf("mtype:%d\n",mtype);
     switch(mtype){
     case 0:
-      //      vnc.get_display();
-      // bmp_for(vnc.img2){
-      // 	int l=(vnc.img(x,y,0)+vnc.img(x,y,1)+vnc.img(x,y,2))/3;
-      // 	vnc.img2(x,y)[0]=l;
-      // 	vnc.img2(x,y)[1]=l;
-      // 	vnc.img2(x,y)[2]=l;
-      // }
-      //      facedetect(vnc.img,vnc.img2);
-      //houghlines(vnc.img,vnc.img2);
-      //houghcircles(vnc.img,vnc.img2);
-      
-      // vnc.img_mutex.lock();
-      
-      // // opticalflow(vnc.img3,vnc.img,vnc.img2);
-      // // vnc.img3=vnc.img;
-      
-      // facedetect(vnc.img,vnc.img2);
-      // vnc.img_mutex.unlock();
-
+      vnc.get_display();
 
       
-      // vnc.set_display(1);
+      // tex.set(vnc.img);
+      {
+	Lock lock(vnc.img_mutex);
+	vnc.img2=vnc.img;
+      }
+
+      //      printf("pre2 hough:%d %d\n",vnc.q_empty,cycle);
+      if(cycle==0){
+	//	printf("pre hough\n");
+
+	Lock lock(vnc.q_mutex);
+	if(vnc.q_empty){
+	  vnc.info_img=vnc.img;
+	  vnc.q_empty=0;
+	  vnc.q_cond.notify();
+	}
+      }
+
+      //vnc.img2.swap(vnc.img);
+      
+      // tex.set(vnc.img);
+      // glutPostRedisplay();
+      vnc.set_display(1);
       break;
     case 1:
       vnc.get_colormap();
@@ -219,25 +191,61 @@ THREAD_CALLBACK(run)(void* vncp){
       break;
     case 3:
       {
-      std::string str=trimword(vnc.get_cuttext());
+	string str=vnc.get_cuttext();
+	printf("clip board:%s\n",str.c_str());
+	if(vnc.get_cuttext_callback)
+	  vnc.get_cuttext_callback((VNC_Client*)vncp,str);
       }
       break;
     default:
       assert(0);
       break;
     }
+    //  cycle=(cycle+1)%(3);
+    cycle=0;//(cycle+1)%(3);
   }
   
 }
 
 
-VNC_Client::VNC_Client():thread(run){
+THREAD_CALLBACK(run_info)(void* vncp){
+  VNC_Client& vnc=*(VNC_Client*)vncp;
+  while(vnc.exitp==0){
+    {
+      Lock lock(vnc.q_mutex);
+      while(vnc.q_empty){
+	vnc.q_cond.wait(lock);
+      }
+    }
+    BMPb next_img(vnc.info_img.w,vnc.info_img.h);
+    if(vnc.img_filter_callback)
+      vnc.img_filter_callback((VNC_Client*)vncp,vnc.info_img,next_img);
+    
+    {
+      Lock lock(vnc.img_mutex);
+      vnc.info_img2=next_img;
+    }
+
+    {
+      Lock lock(vnc.q_mutex);
+      vnc.q_empty=1;
+    }
+    
+  }
+}
+
+
+VNC_Client::VNC_Client():thread(run),thread_info(run_info){
+  get_cuttext_callback=NULL;
+  img_filter_callback=NULL;
+
 }
 
 int
 VNC_Client::init(const std::string& server,int port,const std::string& pass){
   int r;
   exitp=0;
+  socket_init();
   
   fd=socket(AF_INET,SOCK_STREAM,0);
   //  int port=5901;
@@ -263,7 +271,11 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   assert(fd>=0);
 
   r=connect(fd,(sockaddr*)&dstAddr,sizeof(dstAddr));
+  assert(r>=0);
 
+
+  int one = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof(one));  
   assert(r>=0);
 
   unsigned char buf[1024];
@@ -356,7 +368,8 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
   img.init(width,height);
   img2.init(width,height);
-  img3.init(width,height);
+  info_img.init(width,height);
+  info_img2.init(width,height);
 
   printf("%d %d %d %d %s\n",width,height,big_endian_flag,bits_per_pixel,buf);
 
@@ -407,30 +420,53 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   }
 
 
-  imgbuf=(char*)malloc(width*height*bits_per_pixel/8);
-  lbuf  =(char*)malloc(width*bits_per_pixel/8);
+  imgbuf=(uint8_t*)malloc(width*height*bits_per_pixel/8);
 
-  //  set_display(0);
+  mode=0;
+  set_display(0);
+  
+  q_empty=1;
   thread.run(this);
+  thread_info.run(this);
   
   return 0;
 }
 
 int
-VNC_Client::set_display(int inc){
-  //update request
-  write8(3);       //id
-  write8(inc);       //incremental
-  write16(0);//xpos
-  write16(0);//ypos
-  write16(width);//width
-  write16(height);//height
+VNC_Client::set_mode(int mode){
+  Lock lock(img_mutex);
+  this->mode=mode;
+  return mode;
+}
+int
+VNC_Client::set_display(int inc)
+{
+  Lock lock(set_mutex);
+  unsigned char array[]={
+    0x3,
+    inc,
+    0,0,
+    0,0,
+    width>>8,width&0xff,
+    height>>8,height&0xff
+  };
+  write(fd,array,sizeof(array));
+  fsync(fd);
+
+  // //update request
+  // write8(3);       //id
+  // write8(inc);       //incremental
+  // write16(0);//xpos
+  // write16(0);//ypos
+  // write16(width);//width
+  // write16(height);//height
   return 0;
 }
 
 
 const BMPb&
 VNC_Client::get_display(){
+  Lock lock(get_mutex);
   // int mtype;
   int num_of_rec;
   // read8(mtype);
@@ -440,42 +476,69 @@ VNC_Client::get_display(){
   
   //  printf("num_of_rec %d\n",num_of_rec);
 
-
-
   for(int i=0;i<num_of_rec;i++){
     int x,y,w,h,enc;
+    int enc0;
+    int enc1;
     read16(x);
     read16(y);
     read16(w);
     read16(h);
     read32(enc);
-    //    printf("x:%d, y:%d, w:%d, h:%d, end:%d\n",x,y,w,h,enc);
-    assert(enc==0);
-    for(int j=0;j<h;j++){
-      int  total=0;
-      do{
-	int num=read(fd,imgbuf+total,w*bits_per_pixel/8-total);
-	total+=num;
-      }while(w*bits_per_pixel/8!=total);
+
+    int  total=0;
+    do{
+      int num=read(fd,imgbuf+total,h*w*bits_per_pixel/8-total);
+      assert(num!=-1);
+      total+=num;
+    }while(h*w*bits_per_pixel/8!=total);
       
-      for(int k=0;k<w;k++){
-	if(bits_per_pixel==16&&big_endian_flag==0){
-	  unsigned short v=imgbuf[k*2]|(imgbuf[k*2+1]<<8);
+    if(bits_per_pixel==16&&big_endian_flag==0){
+      int idx=0;
+      for(int j=0;j<h;j++){
+	for(int k=0;k<w;k++){
+	  uint8_t* t=(uint8_t*)(imgbuf+idx);
+	  unsigned short v=(t[1]<<8)|t[0];
 	  img(x+k,y+j)[0]=((v>>(red_shift))&(red_max))*(256)/(red_max+1);
 	  img(x+k,y+j)[1]=(v>>(green_shift))&(green_max)*(256)/(green_max+1);
 	  img(x+k,y+j)[2]=(v>>(blue_shift))&(blue_max)*(256)/(blue_max+1);
-	}else if(bits_per_pixel==32&&big_endian_flag==0){
-	  //	  uint32_t v=*(uint32_t*)(imgbuf+k*4);
-	  uint32_t v=*(uint32_t*)(imgbuf+k*4);
+	  img(x+k,y+j)[3]=255;
+	  idx+=2;
+	}
+      }
+    }else if(bits_per_pixel==32&&
+	     big_endian_flag==0&&
+	     red_shift==16&&
+	     green_shift==8&&
+	     blue_shift==0&&
+	     red_max==255&&
+	     green_max==255&&
+	     blue_max==255
+	     ){
+      int idx=0;
+      for(int j=0;j<h;j++){
+	for(int k=0;k<w;k++){
+	  img.rgb[x+k+img.w*(y+j)].b=imgbuf[idx];
+	  img.rgb[x+k+img.w*(y+j)].g=imgbuf[idx+1];
+	  img.rgb[x+k+img.w*(y+j)].r=imgbuf[idx+2];
+	  img.rgb[x+k+img.w*(y+j)].a=255;
+	  idx+=4;
+	}
+      }
+    }else if(bits_per_pixel==32&&big_endian_flag==0){
+      for(int j=0;j<h;j++){
+	for(int k=0;k<w;k++){
+	  int idx=(w*j+k)*4;
+	  uint32_t v=*(uint32_t*)(imgbuf+idx);
 	  img(x+k,y+j)[0]=((v>>(red_shift))  &(red_max))  *(256)/(red_max+1);
 	  img(x+k,y+j)[1]=((v>>(green_shift))&(green_max))*(256)/(green_max+1);
 	  img(x+k,y+j)[2]=((v>>(blue_shift)) &(blue_max)) *(256)/(blue_max+1);
-	}else{
-	  assert(0);
+	  img(x+k,y+j)[3]=255;
 	}
       }
+    }else{
+      assert(0);
     }
-    //    printf("rec %d %d %d %d %d\n",x,y,w,h,enc);
   }
   return img;
 }
@@ -485,33 +548,54 @@ VNC_Client::get_display(){
 int
 VNC_Client::close(){
   exitp=1;
+  thread_info.join();
   thread.join();
-  ::close(fd);
+  closesocket(fd);
   free(imgbuf);
-  free(lbuf);
+  socket_finish();
+  
   return 0;
 }
 
 int
 VNC_Client::set_point(int x,int y,int button){
-  write8(5);//message-type
-  write8(button);//padding
-  write16(x);//num of encodings
-  write16(y);//Raw
+  //  Lock lock(set_mutex);
+  unsigned char array[]={
+    0x5,
+    button,
+    x>>8,x&0xff,
+    y>>8,y&0xff
+  };
+  write(fd,array,sizeof(array));
+  fsync(fd);
   return 0;
 }
 
 int
 VNC_Client::set_key(int key,int down){
-  write8(4);//message-type
-  write8(down);//padding
-  write16(0);//num of encodings
-  write32(key);//Raw
+  Lock lock(set_mutex);
+  unsigned char array[]={
+    0x4,
+    down,
+    0,0,
+    (key>>24)&0xff,
+    (key>>16)&0xff,
+    (key>>8)&0xff,
+    key&0xff
+  };
+  write(fd,array,sizeof(array));
+  fsync(fd);
+  
+  // write8(4);//message-type
+  // write8(down);//padding
+  // write16(0);//num of encodings
+  // write32(key);//Raw
   return 0;
 }
 
 int
 VNC_Client::set_cuttext(const std::string& text){
+  Lock lock(set_mutex);
   write8(6);//message-type
   write8(0);//padding
   write8(0);//padding
@@ -523,6 +607,7 @@ VNC_Client::set_cuttext(const std::string& text){
 
 int
 VNC_Client::get_colormap(){
+  Lock lock(get_mutex);
   int len;
   read8(padding);
   read32(len);
@@ -534,9 +619,9 @@ VNC_Client::get_colormap(){
   return 0;
 }
 
-
 std::string
 VNC_Client::get_cuttext(){
+  Lock lock(get_mutex);
   std::string r;
   read8(padding);
   read8(padding);

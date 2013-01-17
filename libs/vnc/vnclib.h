@@ -68,7 +68,8 @@ struct VNC_Client{
   int set_cuttext(const std::string& text);
   int set_mode(int mode);
 
-  void (*get_cuttext_callback)(VNC_Client*,const std::string& str);
+  void (*get_cuttext_callback)(VNC_Client* vncp,const std::string& str);
+  void (*img_filter_callback)(VNC_Client* vncp,const BMPb& in,BMPb& out);
   
   const BMPb& get_display();
   int         get_colormap();

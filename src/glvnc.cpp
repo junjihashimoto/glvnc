@@ -4,9 +4,9 @@
 #include <vector>
 #include "filter.h"
 
+extern void get_cuttext(VNC_Client* vncp,const string& cuttext);
 
 using namespace std;
-
 
 #define INIT_WIDTH  640
 #define INIT_HEIGHT 480
@@ -31,7 +31,7 @@ float picy=0;
 float scale=1.0f;
 float angle=0.0f;
 int   small=0;
-int   mode=0;
+int   vnc_mode=0;
 
 float org_posx=0.0f;
 float org_posy=0.0f;
@@ -300,6 +300,20 @@ window_fit(double tex_w,double tex_h){
 }
 
 void
+img_filter(VNC_Client* vncp,const BMPb& in,BMPb& out){
+  if(vnc_mode==0)
+    memset((unsigned char*)out.rgb,0,4*out.w*out.h);
+#ifndef WIN32
+  else if(vnc_mode==1)
+    houghlines(in,out);
+  else if(vnc_mode==2)
+    facedetect(in,out);
+#endif
+}
+
+
+
+void
 keydown(unsigned char key, int x, int y){
 
   //  printf("key down:%d\n",(int)key);
@@ -332,8 +346,7 @@ keydown(unsigned char key, int x, int y){
       small=small?0:1;
       break;
     case 'm':
-      mode=(mode+1)%3;
-      vnc.set_mode(mode);
+      vnc_mode=(vnc_mode+1)%3;
       break;
     case 'f':
       fullscreen = !fullscreen;
@@ -529,6 +542,8 @@ main(int argc, char *argv[]){
   glutReshapeFunc(reshape);
 
   vnc.get_cuttext_callback=get_cuttext;
+  vnc.img_filter_callback=img_filter;
+
   vnc.init(argv[1],atoi(argv[2]),argv[3]);
   
   

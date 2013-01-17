@@ -20,9 +20,14 @@ OBJS=$(TOBJS:%.cpp=obj/%.o)
 
 HEADERS=$(shell find .. -name '*.h')
 
-CFLAGS+=-I../libs/libbmp -I../libs/utils -I../libs/freeglut -DFREEGLUT_STATIC  -I../libs/thread
+CFLAGS+=-I../libs/libbmp
+CFLAGS+=-I../libs/utils
+CFLAGS+=-I../libs/freeglut -DFREEGLUT_STATIC
+CFLAGS+=-I../libs/thread
+CFLAGS+=-I../libs/vnc
 
 OTHER_LIBS= ../libs/freeglut/libglut.a
+OTHER_LIBS+= ../libs/vnc/libvnc.a
 
 ifdef WIN32
 OTHER_LIBS+= ../libs/libjpeg/libjpeg.a

@@ -18,16 +18,31 @@ OBJS=$(TOBJS:%.cpp=obj/%.o)
 #OTHER_LIBS=-ldl -L/home4/md2/WORK/PSRX3/hasimoto/GotoBLAS2 -lgoto2 -lgfortran  -lfftw3 -lm
 #OTHER_LIBS=-ldl -lGL -lGLEW -lglut -lGLU -lm
 
-ifdef WIN32
-OTHER_LIBS= ../libs/freeglut/libglut.a -lopengl32 -lglu32 -lwinmm -lgdi32 -lm
-else
-OTHER_LIBS=  ../libs/freeglut/libglut.a   -lGL -lGLU -lm -ldl -lXrandr -llapack  -latlas -lblas -lgfortran -lXxf86vm -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect -lopencv_video
-endif
-
 HEADERS=$(shell find .. -name '*.h')
 
-CFLAGS+=-I../libs/libbmp -I../libs/utils -I../libs/freeglut -DFREEGLUT_STATIC -I../libs/matrix -I../libs/thread
-#CFLAGS+=-I../libs/libbmp -I../libs/utils -I/home/junji/odviewer/libs/freeglut.bak/include  -DFREEGLUT_STATIC
+CFLAGS+=-I../libs/libbmp
+CFLAGS+=-I../libs/utils
+CFLAGS+=-I../libs/freeglut -DFREEGLUT_STATIC
+CFLAGS+=-I../libs/thread
+CFLAGS+=-I../libs/vnc
+
+OTHER_LIBS= ../libs/freeglut/libglut.a
+OTHER_LIBS+= ../libs/vnc/libvnc.a
+
+ifdef WIN32
+OTHER_LIBS+= ../libs/libjpeg/libjpeg.a
+OTHER_LIBS+= ../libs/libpng/libpng.a
+OTHER_LIBS+= ../libs/zlib/libz.a
+OTHER_LIBS+= -lopengl32 -lglu32 -lwinmm -lgdi32 -lws2_32 -lshell32 -lm
+CFLAGS+=-I../libs/libjpeg -I../libs/libpng -I../libs/zlib
+
+else
+OTHER_LIBS+= -lGL -lGLU -lm -ldl -lXrandr -lXxf86vm
+OTHER_LIBS+= -llapack  -latlas -lblas -lgfortran
+OTHER_LIBS+= -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect -lopencv_video
+endif
+
+
 
 all: objs progs
 
@@ -41,9 +56,14 @@ clean:
 	-rm -rf $(PROGRAMS)
 
 obj/%.o:%.cpp $(HEADERS)
+	-if [ ! -d obj ] ; then mkdir obj ;fi
 	$(CXX) -c -o $@ $< $(CFLAGS)
 
 
 bin/%$(EXE):obj/%.o $(LIBS) $(NPROG)
+	-if [ ! -d bin ] ; then mkdir bin ;fi
 	$(CXX) -o $@ $<  $(CFLAGS) $(NPROG) $(LIBS) $(OTHER_LIBS)
 #	cp ../bin/template ../$@
+
+#check-syntax:
+#	$(CXX)  $(CFLAGS)  -Wall -Wextra -pedantic -fsyntax-only $(CHK_SOURCES)

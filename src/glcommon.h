@@ -127,6 +127,5 @@ struct MouseDat{
 };
 
 
-extern void get_cuttext(VNC_Client* vncp,const string& cuttext);
 
 #endif

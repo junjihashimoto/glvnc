@@ -5,6 +5,7 @@ include ../Makefile.common
 
 
 SUBDIRS= \
+vnc \
 freeglut \
 thread \
 utils

@@ -19,13 +19,14 @@ extern "C"{
 #define HAVE_BOOLEAN
 #endif
 }
-#include "glcommon.h"
+//#include "glcommon.h"
 
 #include "d3des.h"
 #include <bmp.h>
 #include "vnclib.h"
 #include "filter.h"
 
+using namespace std;
 
 #ifdef WIN32
 

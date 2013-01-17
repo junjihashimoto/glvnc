@@ -1,7 +1,7 @@
 #include <string>
 #include <bmp.h>
-#include <queue>
-using namespace std;
+/* #include <queue> */
+/* using namespace std; */
 #include "thread.h"
 
 #ifndef WIN32
@@ -68,7 +68,7 @@ struct VNC_Client{
   int set_cuttext(const std::string& text);
   int set_mode(int mode);
 
-  void (*get_cuttext_callback)(VNC_Client*,const string& str);
+  void (*get_cuttext_callback)(VNC_Client*,const std::string& str);
   
   const BMPb& get_display();
   int         get_colormap();

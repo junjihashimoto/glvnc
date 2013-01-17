@@ -15,6 +15,9 @@ extern "C"{
 
 #include <bmp.h>
 #include <string>
+
+#include "vnclib.h"
+
 using namespace std;
 
 #define LEFT_3D  0
@@ -42,6 +45,7 @@ public:
   void getcolor(int x,int y,int& r,int& g,int& b,int& a);
   void set(const BMPb& bmp);
   void set(const char* file);
+
 
   Texture(const BMPb& bmp);
   Texture(const char* file);
@@ -123,5 +127,6 @@ struct MouseDat{
 };
 
 
+extern void get_cuttext(VNC_Client* vncp,const string& cuttext);
 
 #endif

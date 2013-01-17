@@ -1,3 +1,5 @@
+#ifndef THREAD_H
+#define THREAD_H
 #ifdef WIN32
 
 #include <windows.h>
@@ -63,3 +65,4 @@ struct Cond{
   void notify();
 };
 
+#endif

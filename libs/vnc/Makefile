@@ -11,6 +11,9 @@ OBJ=$(patsubst %.cpp,%.o,$(SRC))
 #OPT=-O4 -DNDEBUG
 OPT=-O4 -I../libbmp -I../thread
 
+ifdef WIN32
+OPT+=-I../libjpeg -I../libpng -I../zlib
+endif
 
 all:$(LIBNAME).a
 

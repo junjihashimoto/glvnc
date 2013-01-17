@@ -16,7 +16,6 @@ extern "C"{
 #include <unistd.h>
 #else
 #include <winsock2.h>
-#define HAVE_BOOLEAN
 #endif
 }
 //#include "glcommon.h"

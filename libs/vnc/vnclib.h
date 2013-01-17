@@ -1,5 +1,7 @@
+#ifndef VNCLIB_H
+#define VNCLIB_H
+
 #include <string>
-#include <bmp.h>
 /* #include <queue> */
 /* using namespace std; */
 #include "thread.h"
@@ -8,8 +10,10 @@
 #define SOCKET int
 #else
 #include <winsock2.h>
+#define HAVE_BOOLEAN
 #endif
 
+#include <bmp.h>
 
 
 struct Dat{
@@ -76,4 +80,6 @@ struct VNC_Client{
   /* int         get_bell(); */
   std::string get_cuttext();
 };
+
+#endif
 

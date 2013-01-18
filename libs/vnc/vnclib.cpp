@@ -203,7 +203,7 @@ THREAD_CALLBACK(run)(void* vncp){
 
 THREAD_CALLBACK(run_info)(void* vncp){
   VNC_Client& vnc=*(VNC_Client*)vncp;
-  BMPb next_img;
+  BMP4b next_img;
   
   while(vnc.exitp==0){
     {
@@ -459,7 +459,7 @@ VNC_Client::set_display(int inc)
 }
 
 
-const BMPb&
+const BMP4b&
 VNC_Client::get_display(){
   Lock lock(get_mutex);
   // int mtype;

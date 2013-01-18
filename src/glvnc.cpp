@@ -301,7 +301,7 @@ window_fit(double tex_w,double tex_h){
 }
 
 void
-img_filter(VNC_Client* vncp,const BMPb& in,BMPb& out){
+img_filter(VNC_Client* vncp,const BMP4b& in,BMP4b& out){
   if(vnc_mode==0)
     memset((unsigned char*)out.rgb,0,4*out.w*out.h);
 #ifndef WIN32
@@ -346,6 +346,11 @@ keydown(unsigned char key, int x, int y){
     case 's':
       small=small?0:1;
       break;
+    case 'S':
+      {
+	Lock lock(vnc.img_mutex);
+	vnc.img.write("snap.png");
+      }
     case 'm':
       vnc_mode=(vnc_mode+1)%3;
       break;

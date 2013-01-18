@@ -42,10 +42,10 @@ struct VNC_Client{
   int vnc_minor_ver;
 
   uint8_t* imgbuf;
-  BMPb  img_buf;
-  BMPb  img;
-  BMPb  info_img_buf;
-  BMPb  info_img;
+  BMP4b  img_buf;
+  BMP4b  img;
+  BMP4b  info_img_buf;
+  BMP4b  info_img;
 
   Thread thread;
   
@@ -73,9 +73,9 @@ struct VNC_Client{
   int set_mode(int mode);
 
   void (*get_cuttext_callback)(VNC_Client* vncp,const std::string& str);
-  void (*img_filter_callback)(VNC_Client* vncp,const BMPb& in,BMPb& out);
+  void (*img_filter_callback)(VNC_Client* vncp,const BMP4b& in,BMP4b& out);
   
-  const BMPb& get_display();
+  const BMP4b& get_display();
   int         get_colormap();
   /* int         get_bell(); */
   std::string get_cuttext();

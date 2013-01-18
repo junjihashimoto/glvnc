@@ -17,13 +17,13 @@ void opticalflow(const Mat& img1,Mat& img2);
 
 
 void
-copy(const BMPb& in,Mat& out){
+copy(const BMP4b& in,Mat& out){
   bmp_for(in)
     out.at<Vec3b>(y,x)={in(x,y,2),in(x,y,1),in(x,y,0)};
 }
 
 void
-copy(const Mat& in,BMPb& out){
+copy(const Mat& in,BMP4b& out){
   bmp_for(out){
     Vec3b p=in.at<Vec3b>(y,x);
     out(x,y,2)=p.val[0];
@@ -33,7 +33,7 @@ copy(const Mat& in,BMPb& out){
 }
 
 void
-copy_alpha(const Mat& in,BMPb& out){
+copy_alpha(const Mat& in,BMP4b& out){
   bmp_for(out){
     Vec3b p=in.at<Vec3b>(y,x);
     if(p.val[0]||p.val[1]||p.val[2])
@@ -47,7 +47,7 @@ copy_alpha(const Mat& in,BMPb& out){
 }
 
 void
-facedetect(const BMPb& in,BMPb& out){
+facedetect(const BMP4b& in,BMP4b& out){
   Mat img(in.h,in.w,CV_8UC3);
   copy(in,img);
   facedetect(img);
@@ -56,7 +56,7 @@ facedetect(const BMPb& in,BMPb& out){
 
 
 void
-houghlines(const BMPb& in,BMPb& out){
+houghlines(const BMP4b& in,BMP4b& out){
   Mat img(in.h,in.w,CV_8UC3);
   copy(in,img);
   HoughLines(img);
@@ -65,7 +65,7 @@ houghlines(const BMPb& in,BMPb& out){
 
 
 void
-houghcircles(const BMPb& in,BMPb& out){
+houghcircles(const BMP4b& in,BMP4b& out){
   Mat img(in.h,in.w,CV_8UC3);
   copy(in,img);
   HoughCircles(img);
@@ -74,7 +74,7 @@ houghcircles(const BMPb& in,BMPb& out){
 
 
 void
-opticalflow(const BMPb& pre,const BMPb& cur,BMPb& out){
+opticalflow(const BMP4b& pre,const BMP4b& cur,BMP4b& out){
   Mat p(pre.h,pre.w,CV_8UC3);
   Mat c(cur.h,cur.w,CV_8UC3);
   copy(pre,p);
@@ -247,7 +247,7 @@ Camera::open(int w,int h,int devid){
   }
   return 0;
 }
-BMPb&
+BMP4b&
 Camera::get(){
   cv::Mat frame;
   *((cv::VideoCapture*)cap) >> frame;
@@ -255,9 +255,9 @@ Camera::get(){
   return img;
 }
 
-BMPb
+BMP4b
 getcamera(int w,int h,int devid){
-  BMPb a(w,h);
+  BMP4b a(w,h);
   VideoCapture capture(devid);
   capture.set(CV_CAP_PROP_FRAME_WIDTH, w);
   capture.set(CV_CAP_PROP_FRAME_HEIGHT, h);

@@ -27,7 +27,7 @@ void Texture::getcolor(int x,int y,int& r,int& g,int& b,int& a){
     a=data[x*4+y*(4*sizeX)+3];
   }
 }
-void Texture::set(const BMPb& bmp){
+void Texture::set(const BMP4b& bmp){
 
   sizeX=bmp.w;
   sizeY=bmp.h;
@@ -61,12 +61,12 @@ void Texture::set(const BMPb& bmp){
   //    glDisable(GL_TEXTURE_RECTANGLE_ARB);//テクスチャ無効
 }
 void Texture::set(const char* file){
-  BMPb in(file);
+  BMP4b in(file);
   set(in);
   filename=file;
 }
 
-Texture::Texture(const BMPb& bmp):data(NULL){
+Texture::Texture(const BMP4b& bmp):data(NULL){
   set(bmp);
 }
 Texture::Texture(const char* file):data(NULL){

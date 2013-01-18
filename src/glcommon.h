@@ -43,11 +43,11 @@ public:
   Texture(const Texture& tex);
   ~Texture();
   void getcolor(int x,int y,int& r,int& g,int& b,int& a);
-  void set(const BMPb& bmp);
+  void set(const BMP4b& bmp);
   void set(const char* file);
 
 
-  Texture(const BMPb& bmp);
+  Texture(const BMP4b& bmp);
   Texture(const char* file);
   Texture&
   operator = (const Texture& tex);

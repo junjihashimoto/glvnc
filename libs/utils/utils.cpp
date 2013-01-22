@@ -16,6 +16,8 @@ extern "C"{
 #include <libgen.h>
 #include <execinfo.h>
 #include <signal.h>
+#include <iconv.h>
+#include <errno.h>
 #endif
   
 #include <sys/stat.h>
@@ -144,6 +146,55 @@ Eval::~Eval(){
   close();
 }
 #endif
+
+
+string
+convert_string(const string& src_format,
+	       const string& dst_format,
+	       const string& src){
+#ifdef WIN32
+#warning "convert_string is not implemented."  
+  return src;
+#else
+  
+  iconv_t icd;
+  char s_dst[1024+1];
+  char *p_src, *p_dst;
+  size_t n_src, n_dst;
+  string dst;
+
+  //  icd = iconv_open("UTF-8", "Shift_JIS");
+  icd = iconv_open(dst_format.c_str(),
+		   src_format.c_str()
+  		   );
+  p_src = (char*)src.c_str();
+  n_src = src.length();
+  
+
+  while(0 < n_src){
+    //    printf("iconv\n");
+    p_dst = s_dst;
+    n_dst = sizeof(s_dst)-1;
+    int err=iconv(icd, &p_src, &n_src, &p_dst, &n_dst);
+    if(err==-1){
+      perror("convert_string error\n");
+      if(errno==E2BIG)
+  	printf("E2BIG:buffer is too small\n");
+      else if(errno==EILSEQ)
+  	printf("EILSEQ:invalid multibyte sequence\n");
+      else if(errno==EINVAL)
+  	printf("EILSEQ:incomplete multibyte sequence\n");
+      break;
+    }
+    
+    *p_dst = '\0';
+    dst+=s_dst;
+  }
+
+  iconv_close(icd);
+  return dst;
+#endif
+}
 
 
 int

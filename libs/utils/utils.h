@@ -27,7 +27,10 @@ inline int lmt(int a){
 extern std::string strfs(const char* format, ...);
 #define strf(x,...) strfs(x,__VA_ARGS__).c_str()
 
-
+extern std::string convert_string(const std::string& src_format,
+				  const std::string& dst_format,
+				  const std::string& src);
+			     
 extern int filesize(const char* file);
 extern int file_size(const char* file);
 extern int file_exist(const char* file);

@@ -524,6 +524,7 @@ main(int argc, char *argv[]){
   // }
   // return 0;
 
+
   char *temp[2]={"vnclient",NULL};
   int num=1;
   glutInit(&num,temp);

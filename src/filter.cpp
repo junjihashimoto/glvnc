@@ -238,11 +238,12 @@ Camera::~Camera(){
 }
 int
 Camera::open(int w,int h,int devid){
-  cap=(void*)new cv::VideoCapture(devid);
-  ((cv::VideoCapture*)cap)->set(CV_CAP_PROP_FRAME_WIDTH, w);
-  ((cv::VideoCapture*)cap)->set(CV_CAP_PROP_FRAME_HEIGHT,h);
-  if(!((cv::VideoCapture*)cap)->isOpened()){
-    delete (cv::VideoCapture*)cap;
+  VideoCapture* capp=new VideoCapture(devid);
+  VideoCapture& cap=*capp;
+  cap.set(CV_CAP_PROP_FRAME_WIDTH, w);
+  cap.set(CV_CAP_PROP_FRAME_HEIGHT,h);
+  if(!cap.isOpened()){
+    delete capp;
     return -1;
   }
   return 0;
@@ -250,7 +251,7 @@ Camera::open(int w,int h,int devid){
 BMP4b&
 Camera::get(){
   cv::Mat frame;
-  *((cv::VideoCapture*)cap) >> frame;
+  ((cv::VideoCapture*)cap)->read(frame);
   copy(frame,img);
   return img;
 }

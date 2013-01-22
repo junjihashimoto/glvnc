@@ -31,6 +31,7 @@
 
 #if TARGET_HOST_POSIX_X11
 #include <limits.h>  /* LONG_MAX */
+#include <locale.h> 
 #endif
 
 /*
@@ -246,6 +247,7 @@ int fgHintPresent(Window window, Atom property, Atom hint)
 static void fghInitialize( const char* displayName )
 {
 #if TARGET_HOST_POSIX_X11
+    setlocale(LC_ALL,"");
     fgDisplay.Display = XOpenDisplay( displayName );
 
     if( fgDisplay.Display == NULL )

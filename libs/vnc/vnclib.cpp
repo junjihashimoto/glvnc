@@ -185,7 +185,7 @@ THREAD_CALLBACK(run)(void* vncp){
     case 3:
       {
 	string str=vnc.get_cuttext();
-	printf("clip board:%s\n",str.c_str());
+	//	printf("clip board:%s\n",str.c_str());
 	if(vnc.get_cuttext_callback)
 	  vnc.get_cuttext_callback((VNC_Client*)vncp,str);
       }
@@ -286,7 +286,10 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
   {
     //    const char ver[]="RFB 003.008\n";
-    s=write(fd,buf,12);
+    // s=write(fd,buf,12);
+    // assert(s==12);
+    const char ver[]="RFB 003.003\n";
+    s=write(fd,ver,sizeof(ver)-1);
     assert(s==12);
   }
 

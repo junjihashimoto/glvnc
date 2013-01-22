@@ -1083,12 +1083,12 @@ void FGAPIENTRY glutMainLoopEvent( void )
     if(clipboard_set){
       SFG_Window* window = ( SFG_Window * )fgStructure.Windows.First;
       XSetSelectionOwner(fgDisplay.Display,
-			 XA_CLIPBOARD,
+			 XA_PRIMARY,
 			 window->Window.Handle,
 			 CurrentTime);
       if(XGetSelectionOwner(fgDisplay.Display,
-			    XA_CLIPBOARD)==window->Window.Handle){
-	/* printf("set clipboard\n"); */
+			    XA_PRIMARY)==window->Window.Handle){
+	//	printf("set clipboard\n");
 	clipboard_set=0;
       }
     }
@@ -1270,7 +1270,7 @@ void FGAPIENTRY glutMainLoopEvent( void )
 
     case SelectionRequest:{
       XSelectionEvent se;
-      /* printf("send selection request:%s\n",clipboard_string); */
+      //      printf("send selection request:%s\n",clipboard_string);
       se.type=SelectionNotify;
       se.requestor=event.xselectionrequest.requestor;
       se.selection=event.xselectionrequest.selection;

@@ -289,6 +289,8 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
     // s=write(fd,buf,12);
     // assert(s==12);
     const char ver[]="RFB 003.003\n";
+    vnc_main_ver=3;
+    vnc_minor_ver=3;
     s=write(fd,ver,sizeof(ver)-1);
     assert(s==12);
   }

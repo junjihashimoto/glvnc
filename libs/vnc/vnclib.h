@@ -60,6 +60,10 @@ struct VNC_Client{
   Mutex  q_mutex;
   Cond   q_cond;
   int    q_empty;
+
+  int    wait_get_display_flag;
+  Mutex  get_display_mutex;
+  Cond   get_display_cond;
   
 
   VNC_Client();
@@ -70,7 +74,8 @@ struct VNC_Client{
   int set_point(int x,int y,int button);
   int set_key(int key,int down);
   int set_cuttext(const std::string& text);
-  int set_mode(int mode);
+  
+  void wait_get_display();
 
   void (*get_cuttext_callback)(VNC_Client* vncp,const std::string& str);
   void (*img_filter_callback)(VNC_Client* vncp,const BMP4b& in,BMP4b& out);

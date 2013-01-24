@@ -69,8 +69,9 @@ chomp(const std::string& str){
 
 void
 get_cuttext(VNC_Client* vncp,const string& cuttext){
+  string str=convert_string("Shift_JIS","UTF-8",cuttext);
   //  printf("clipboard:%s\n",convert_string("Shift_JIS","UTF-8",cuttext).c_str());
-  glutSetClipboard(convert_string("Shift_JIS","UTF-8",cuttext).c_str());
+  glutSetClipboard(str.c_str());
   
   // std::string str=trimword(cuttext);
   // std::string w3m=strf("w3m -cols 60 -dump 'http://eow.alc.co.jp/%s/UTF-8/?ref=sa'  ",str.c_str());

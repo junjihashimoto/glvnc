@@ -143,7 +143,6 @@ nto_uint16(unsigned char* buf){
 
 THREAD_CALLBACK(run)(void* vncp){
   VNC_Client& vnc=*(VNC_Client*)vncp;
-  int cycle=0;
   while(vnc.exitp==0){
     int mtype;
     {
@@ -157,16 +156,12 @@ THREAD_CALLBACK(run)(void* vncp){
     case 0:
       vnc.get_display();
 
-      
-      // tex.set(vnc.img);
       {
 	Lock lock(vnc.img_mutex);
 	vnc.img=vnc.img_buf;
       }
 
-      //      printf("pre2 hough:%d %d\n",vnc.q_empty,cycle);
-      if(cycle==0){
-	//	printf("pre hough\n");
+      {
 	Lock lock(vnc.q_mutex);
 	if(vnc.q_empty){
 	  vnc.info_img_buf=vnc.img_buf;
@@ -175,6 +170,12 @@ THREAD_CALLBACK(run)(void* vncp){
 	}
       }
       vnc.set_display(1);
+
+      if(vnc.wait_get_display_flag){
+	Lock lock(vnc.get_display_mutex);
+	vnc.get_display_cond.notify();
+      }
+      
       break;
     case 1:
       vnc.get_colormap();
@@ -194,8 +195,6 @@ THREAD_CALLBACK(run)(void* vncp){
       assert(0);
       break;
     }
-    //  cycle=(cycle+1)%(3);
-    cycle=0;//(cycle+1)%(3);
   }
   
 }
@@ -233,7 +232,7 @@ THREAD_CALLBACK(run_info)(void* vncp){
 VNC_Client::VNC_Client():thread(run),thread_info(run_info){
   get_cuttext_callback=NULL;
   img_filter_callback=NULL;
-
+  wait_get_display_flag=0;
 }
 
 int
@@ -421,23 +420,15 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
 
 
   imgbuf=(uint8_t*)malloc(width*height*bits_per_pixel/8);
-
-  mode=0;
-  set_display(0);
-  
   q_empty=1;
+  
+  set_display(0);
   thread.run(this);
   thread_info.run(this);
   
   return 0;
 }
 
-int
-VNC_Client::set_mode(int mode){
-  Lock lock(img_mutex);
-  this->mode=mode;
-  return mode;
-}
 int
 VNC_Client::set_display(int inc)
 {
@@ -633,4 +624,11 @@ VNC_Client::get_cuttext(){
     r+=c;
   }
   return r;
+}
+
+void
+VNC_Client::wait_get_display(){
+  wait_get_display_flag=1;
+  Lock lock(get_display_mutex);
+  get_display_cond.wait(lock);
 }

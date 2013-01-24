@@ -28,7 +28,7 @@ struct VNC_Client{
   int bits_per_pixel;//1
   int depth;//1
   int big_endian_flag;//1
-  int true_colour_flag;//1
+  int true_color_flag;//1
   int red_max;//2
   int green_max;//2
   int blue_max;//2

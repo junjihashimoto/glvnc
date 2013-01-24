@@ -352,7 +352,7 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   read8(bits_per_pixel);
   read8(depth);
   read8(big_endian_flag);
-  read8(true_colour_flag);
+  read8(true_color_flag);
   read16(red_max);
   read16(green_max);
   read16(blue_max);
@@ -373,39 +373,41 @@ VNC_Client::init(const std::string& server,int port,const std::string& pass){
   printf("%d %d %d %d %s\n",width,height,big_endian_flag,bits_per_pixel,buf);
 
   {
-    //setpixelformat
-    write8(0);//message-type
-    write8(0);//padding
-    write8(0);//padding
-    write8(0);//padding
-  
-    write8(32);//pit_per_pixel
-    write8(24);//depth
-    write8(0);//big-endian
-    write8(1);//true-color
-  
-    write16(255);//reg
-    write16(255);//green
-  
-    write16(255);//blue
-    write8(16);//reg-shift
-    write8(8);//green-shift
-  
-    write8(0);//blue-shift
-    write8(0);//padding
-    write8(0);//padding
-    write8(0);//padding
-
     bits_per_pixel=32;//1
     depth=24;//1
     big_endian_flag=0;//1
-    true_colour_flag=1;//1
+    true_color_flag=1;//1
     red_max=255;//2
     green_max=255;//2
     blue_max=255;//2
     red_shift=16;//1
     green_shift=8;//1
     blue_shift=0;//1
+
+    
+    //setpixelformat
+    write8(0);//message-type
+    write8(0);//padding
+    write8(0);//padding
+    write8(0);//padding
+  
+    write8(bits_per_pixel);//pit_per_pixel
+    write8(depth);//depth
+    write8(big_endian_flag);//big-endian
+    write8(true_color_flag);//true-color
+  
+    write16(red_max);//reg
+    write16(green_max);//green
+  
+    write16(blue_max);//blue
+    write8(red_shift);//red-shift
+    write8(green_shift);//green-shift
+  
+    write8(blue_shift);//blue-shift
+    write8(0);//padding
+    write8(0);//padding
+    write8(0);//padding
+
   }
   
 
@@ -508,11 +510,13 @@ VNC_Client::get_display(){
 	     ){
       int idx=0;
       for(int j=0;j<h;j++){
+	int offset=x+img_buf.w*(y+j);
 	for(int k=0;k<w;k++){
-	  img_buf.rgb[x+k+img_buf.w*(y+j)].b=imgbuf[idx];
-	  img_buf.rgb[x+k+img_buf.w*(y+j)].g=imgbuf[idx+1];
-	  img_buf.rgb[x+k+img_buf.w*(y+j)].r=imgbuf[idx+2];
-	  img_buf.rgb[x+k+img_buf.w*(y+j)].a=255;
+	  img_buf.rgb[offset].b=imgbuf[idx];
+	  img_buf.rgb[offset].g=imgbuf[idx+1];
+	  img_buf.rgb[offset].r=imgbuf[idx+2];
+	  img_buf.rgb[offset].a=255;
+	  offset++;
 	  idx+=4;
 	}
       }

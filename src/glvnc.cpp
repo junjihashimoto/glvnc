@@ -1,4 +1,5 @@
 #include "glcommon.h"
+#include <GL/glui.h>
 #include "utils.h"
 
 #include <vector>
@@ -511,6 +512,11 @@ reshape(int w,int h){
   vnc.set_key(0xffe9,0);
 }
 
+void gluiCallback(int num) {
+	exit(0);
+}
+
+
 int
 main(int argc, char *argv[]){
   // Camera cam;
@@ -553,7 +559,11 @@ main(int argc, char *argv[]){
 
   vnc.init(argv[1],atoi(argv[2]),argv[3]);
   
-  
+  GLUI *glui = GLUI_Master.create_glui("control");
+
+  //glui->add_rotation("Rotation",rotate);
+  glui->add_button("Exit", 0, gluiCallback);
+    
   glutMainLoop();
   vnc.close();
   return 0;

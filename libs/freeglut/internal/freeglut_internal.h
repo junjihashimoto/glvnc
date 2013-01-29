@@ -253,6 +253,7 @@ typedef void (* FGCBMenuStatus    )( int, int, int );
 
 typedef void (* FGCBDropFile      )( const char* );
 typedef void (* FGCBGetClipboard      )( const char* );
+typedef void (* FGCBWindowFocus      )();
 
 
 /* The callback used when creating/using menus */
@@ -332,6 +333,7 @@ struct tagSFG_State
     FGCBDropFile     DropFileCallback;         /* The global idle callback       */
 
     FGCBGetClipboard GetClipboardCallback;         /* The global idle callback       */
+    FGCBWindowFocus  WindowFocusCallback;
 
     int              ActiveMenus;          /* Num. of currently active menus */
     FGCBMenuState    MenuStateCallback;    /* Menu callbacks are global      */

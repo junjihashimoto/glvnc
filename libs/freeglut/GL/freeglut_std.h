@@ -468,6 +468,7 @@ FGAPI void    FGAPIENTRY glutTimerFunc( unsigned int time, void (* callback)( in
 FGAPI void    FGAPIENTRY glutIdleFunc( void (* callback)( void ) );
 FGAPI void    FGAPIENTRY glutDropFileFunc( void (* callback)( const char* file ) );
 FGAPI void    FGAPIENTRY glutGetClipboardFunc( void (* callback)( const char* str ) );
+FGAPI void    FGAPIENTRY glutWindowFocusFunc( void (* callback)());
 
 /*
  * Window-specific callback functions, see freeglut_callbacks.c

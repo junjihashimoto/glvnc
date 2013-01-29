@@ -103,6 +103,12 @@ void FGAPIENTRY glutGetClipboardFunc( void (* callback)(const char* ) )
     fgState.GetClipboardCallback = callback;
 }
 
+void FGAPIENTRY glutWindowFocusFunc( void (* callback)() )
+{
+    FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutWindowFocusFunc" );
+    fgState.WindowFocusCallback = callback;
+}
+
 
 /*
  * Sets the Timer callback for the current window

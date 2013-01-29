@@ -1268,6 +1268,12 @@ void FGAPIENTRY glutMainLoopEvent( void )
 	    
       break;
 
+    case FocusIn:{
+      if(fgState.WindowFocusCallback)
+	fgState.WindowFocusCallback();
+      
+      break;
+    }
     case SelectionRequest:{
       XSelectionEvent se;
       //      printf("send selection request:%s\n",clipboard_string);
@@ -2275,6 +2281,10 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 
     case WM_SETFOCUS:
       /*        printf("WM_SETFOCUS: %p\n", window ); */
+      if(fgState.WindowFocusCallback)
+	fgState.WindowFocusCallback();
+      
+      
       lRet = DefWindowProc( hWnd, uMsg, wParam, lParam );
       INVOKE_WCB( *window, Entry, ( GLUT_ENTERED ) );
       break;

@@ -516,6 +516,9 @@ void gluiCallback(int num) {
 	exit(0);
 }
 
+void focus(){
+  printf("focus in\n");
+}
 
 int
 main(int argc, char *argv[]){
@@ -541,6 +544,7 @@ main(int argc, char *argv[]){
   glutKeyboardUpFunc(keyup);
   glutSpecialFunc(skeydown);
   glutSpecialUpFunc(skeyup);
+  glutWindowFocusFunc(focus);
 
   glutMouseFunc(mouse);
   glutMotionFunc(motion);

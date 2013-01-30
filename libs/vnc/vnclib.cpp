@@ -160,6 +160,8 @@ THREAD_CALLBACK(run)(void* vncp){
 	Lock lock(vnc.img_mutex);
 	vnc.img=vnc.img_buf;
       }
+      if(vnc.get_display_callback)
+	vnc.get_display_callback((VNC_Client*)vncp,vnc.img);
 
       {
 	Lock lock(vnc.q_mutex);

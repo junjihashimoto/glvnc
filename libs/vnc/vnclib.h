@@ -78,6 +78,7 @@ struct VNC_Client{
   void wait_get_display();
 
   void (*get_cuttext_callback)(VNC_Client* vncp,const std::string& str);
+  void (*get_display_callback)(VNC_Client* vncp,const BMP4b& in);
   void (*img_filter_callback)(VNC_Client* vncp,const BMP4b& in,BMP4b& out);
   
   const BMP4b& get_display();

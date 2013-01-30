@@ -210,15 +210,15 @@ int super_toggle=0;
 
 void 
 vnckey(unsigned char key,int updown){
-  if(ctrl_key){
-    if(updown){
-      vnc.set_key(0xffe3,1);
-      vnc.set_key(0x60+key,1);
-    }else{
-      vnc.set_key(0x60+key,0);
-      vnc.set_key(0xffe3,0);
-    }
-  }else{
+  // if(ctrl_key){
+  //   if(updown){
+  //     vnc.set_key(0xffe3,1);
+  //     vnc.set_key(0x60+key,1);
+  //   }else{
+  //     vnc.set_key(0x60+key,0);
+  //     vnc.set_key(0xffe3,0);
+  //   }
+  // }else{
     switch(key){
     case 0x8: //backspace
     case 0x9: //tab
@@ -232,7 +232,7 @@ vnckey(unsigned char key,int updown){
     default:
       vnc.set_key(key,updown);
     }
-  }
+    //  }
 }
 
 void 
@@ -314,12 +314,22 @@ img_filter(VNC_Client* vncp,const BMP4b& in,BMP4b& out){
 }
 
 
+void
+set_modifiers(){
+  int shift=glutGetModifiers() & GLUT_ACTIVE_SHIFT;
+  int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL;
+  int alt  =glutGetModifiers() & GLUT_ACTIVE_ALT;
+  vnc.set_key(0xffe1,shift);
+  vnc.set_key(0xffe3,ctrl);
+  vnc.set_key(0xffe9,alt);
+}
 
 void
 keydown(unsigned char key, int x, int y){
 
   //  printf("key down:%d\n",(int)key);
   if(super_toggle){
+    set_modifiers();
     vnckey(key,1);
   }else{
     switch(key){
@@ -397,6 +407,7 @@ skeydown(int key, int x, int y){
   }
   // //  printf("super_togle %d\n",super_toggle);
   if(super_toggle){
+    set_modifiers();
     vncskey(key,1);
   }
 }
@@ -441,6 +452,7 @@ mouse(int button , int state , int x , int y) {
   gen_picxy();
 
   if(super_toggle){
+    set_modifiers();
     vnc.set_point(picx,picy,mouse_vnc2glut(mousedat.button,mousedat.state));
   }else{
 

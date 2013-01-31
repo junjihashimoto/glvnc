@@ -58,15 +58,15 @@ get_display(VNC_Client* vncp,const BMP4b& in){
 
 void
 idle(){
-  // int flag=0;
-  // {
-  //   //    Lock lock(get_display_mutex);
-  //   if(update){
-  //     update=0;
-  //     flag=1;
-  //   }
-  // }
-  // if(flag)
+  int flag=0;
+  {
+    //    Lock lock(get_display_mutex);
+    if(update){
+      update=0;
+      flag=1;
+    }
+  }
+  if(flag)
     glutPostRedisplay();
 }
 
@@ -229,15 +229,18 @@ int super_toggle=0;
 
 void 
 vnckey(unsigned char key,int updown){
-  if(ctrl_key){
-    if(updown){
-      vnc.set_key(0xffe3,1);
-      vnc.set_key(0x60+key,1);
-    }else{
-      vnc.set_key(0x60+key,0);
-      vnc.set_key(0xffe3,0);
-    }
-  }else{
+  int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL  ? 1:0;
+
+  //  printf("vnckey:%d %c %d\n",(int)(key),(char)key,updown);
+  // if(ctrl_key){
+  //   if(updown){
+  //     vnc.set_key(0xffe3,1);
+  //     vnc.set_key(0x60+key,1);
+  //   }else{
+  //     vnc.set_key(0x60+key,0);
+  //     vnc.set_key(0xffe3,0);
+  //   }
+  // }else{
     switch(key){
     case 0x8: //backspace
     case 0x9: //tab
@@ -249,9 +252,12 @@ vnckey(unsigned char key,int updown){
       vnc.set_key(0xffff,updown);
       break;
     default:
-      vnc.set_key(key,updown);
+      if(ctrl)
+	vnc.set_key(0x60+key,updown);
+      else
+	vnc.set_key(key,updown);
     }
-     }
+     // }
 }
 
 void 
@@ -291,6 +297,7 @@ vncskey(unsigned char key,int updown){
     vnc.set_key(0xffe1,updown);break;
   case 0x72://ctrl
     ctrl_key=updown;
+    //    printf("ctrl %d\n",updown);
     vnc.set_key(0xffe3,updown);break;
   case 0x74://alt
     alt_key=updown;
@@ -336,12 +343,13 @@ img_filter(VNC_Client* vncp,const BMP4b& in,BMP4b& out){
 
 void
 set_modifiers(){
-  // int shift=glutGetModifiers() & GLUT_ACTIVE_SHIFT;
-  // int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL;
-  // int alt  =glutGetModifiers() & GLUT_ACTIVE_ALT;
-  // vnc.set_key(0xffe1,shift);
-  // vnc.set_key(0xffe3,ctrl);
-  // vnc.set_key(0xffe9,alt);
+  int shift=glutGetModifiers() & GLUT_ACTIVE_SHIFT ? 1:0;
+  int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL  ? 1:0;
+  int alt  =glutGetModifiers() & GLUT_ACTIVE_ALT   ? 1:0;
+  //  printf("s:%d c:%d a:%d\n",shift,ctrl,alt);
+  vnc.set_key(0xffe1,shift);
+  vnc.set_key(0xffe3,ctrl);
+  vnc.set_key(0xffe9,alt);
 }
 
 void
@@ -459,9 +467,9 @@ mouse_vnc2glut(int button,int state){
 void
 mouse(int button , int state , int x , int y) {
   update=1;
-  int shift=glutGetModifiers() & GLUT_ACTIVE_SHIFT;
-  int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL;
-  int alt  =glutGetModifiers() & GLUT_ACTIVE_ALT;
+  int shift=glutGetModifiers() & GLUT_ACTIVE_SHIFT ? 1:0;
+  int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL  ? 1:0;
+  int alt  =glutGetModifiers() & GLUT_ACTIVE_ALT   ? 1:0;
   mousedat.button=button&0x7;
   mousedat.state=state;
   mousedat.x=x;
@@ -592,8 +600,8 @@ main(int argc, char *argv[]){
   glutDisplayFunc(display);
   Init();
   set_vsync(1);
-  //glutTimerFunc(1000/60 , timer , 0);
-  glutIdleFunc(idle);
+  glutTimerFunc(1000/60 , timer , 0);
+  //glutIdleFunc(idle);
   glutDropFileFunc(dropfile);
   glutReshapeFunc(reshape);
 

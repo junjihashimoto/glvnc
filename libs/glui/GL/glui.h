@@ -646,6 +646,7 @@ class GLUIAPI GLUI_Main : public GLUI_Node
 
 protected:
     /*** Variables ***/
+    void*         freetypep;
     int           main_gfx_window_id;
     int           mouse_button_down;
     int           glut_window_id;

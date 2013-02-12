@@ -30,7 +30,20 @@
 
 *****************************************************************************/
 #include "glui_internal_control.h"
+#include "GL/freeglut_ext.h"
+extern "C" {
 
+  void*          freetype_new();
+  void           freetype_init(void* freetypep);
+  void           freetype_close(void* freetypep);
+  void           freetype_delete(void* freetypep);
+  int            freetype_get_width(void* freetypep);
+  int            freetype_get_height(void* freetypep);
+  unsigned char* freetype_getstring(void* freetypep,const char* str);
+  unsigned char* freetype_get(void* freetypep,int charcode);
+  void           freetype_set_font(void* freetypep,const char* font_file);
+  void           freetype_set_size(void* freetypep,int w,int h);
+}
 
 /**
  Note: moving this routine here from glui_add_controls.cpp prevents the linker
@@ -183,7 +196,7 @@ void GLUI_Main::create_standalone_window( const char *name, int x, int y )
   glutInitWindowSize( 100, 100 );
   if ( x >= 0 OR y >= 0 )
     glutInitWindowPosition( x, y );
-  glutInitDisplayMode( GLUT_RGB | GLUT_DOUBLE ); 
+  glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE ); 
   glut_window_id = glutCreateWindow( name );
 }
 
@@ -641,10 +654,12 @@ void _glutBitmapString( void *font, const char *s )
 {
   const char *p = s;
 
-  while( *p != '\0' )  {
-    glutBitmapCharacter( font, *p );
-    p++;
-  }
+  //glutBitmapString(font,p);
+  glutBitmapString( font,(const unsigned char*) p );
+  // while( *p != '\0' )  {
+  //   glutBitmapCharacter( font, *p );
+  //   p++;
+  // }
 }
 
 
@@ -1127,6 +1142,12 @@ GLUI_Main::GLUI_Main( void )
   glui_id                 = GLUI_Master.glui_id_counter;
   GLUI_Master.glui_id_counter++;
 
+  freetypep=freetype_new();
+  freetype_init(freetypep);
+  freetype_set_font(freetypep,"/usr/share/fonts/truetype/fonts-japanese-gothic.ttf");
+  freetype_set_size(freetypep,12,12);
+  
+  // font                    = freetypep;//GLUT_BITMAP_HELVETICA_12;
   font                    = GLUT_BITMAP_HELVETICA_12;
   curr_cursor             = GLUT_CURSOR_LEFT_ARROW;
 

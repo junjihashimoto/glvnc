@@ -74,7 +74,8 @@ HEADERS=\
 ./internal/algebra3.h
 
 
-CFLAGS=-O4 -DNDEBUG
+CFLAGS= -g
+#-O4 -DNDEBUG
 
 ifdef WIN32
 OPT  = $(CFLAGS) -Iinternal -I. -I../freeglut

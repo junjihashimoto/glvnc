@@ -23,6 +23,7 @@ extern "C"{
 
 #include <rgb.h>
 #include <rgba.h>
+#include <color1.h>
 
 
 #define bmp_for2(bmp)	 \
@@ -95,6 +96,8 @@ typedef Bitmap<short,color4<short> >                 BMP4s;
 typedef Bitmap<unsigned char,color4<unsigned char> > BMP4b;
 typedef Bitmap<float,color4<float> >                 BMP4f;
 typedef Bitmap<double,color4<double> >               BMP4d;
+
+typedef Bitmap<unsigned char,color1<unsigned char> > BMP1b;
 
 template<class T,class COLOR>
 Bitmap<T,COLOR>::Bitmap(){

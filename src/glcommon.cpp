@@ -5,6 +5,7 @@ extern "C"{
 }
 
 #include "glcommon.h"
+#include "freetype_util_c.h"
 
 int  fps_count=0;
 int  fps_Max=0;
@@ -33,7 +34,19 @@ Printf(int x,int y,const char* format, ...){
 
   glPushMatrix();
   glRasterPos2f( x , y );
-  glutBitmapString( GLUT_BITMAP_HELVETICA_10 , (const unsigned char*)strf_buf );
+  
+  void* freetypep=freetype_new();
+  freetype_init(freetypep);
+  freetype_set_font(freetypep,"/usr/share/fonts/truetype/fonts-japanese-gothic.ttf");
+  freetype_set_size(freetypep,14,14);
+  
+  //  font                    = freetypep;//GLUT_BITMAP_HELVETICA_12;
+  //  glutBitmapString( GLUT_BITMAP_HELVETICA_10 , (const unsigned char*)strf_buf );
+  glutBitmapString( freetypep , (const unsigned char*)strf_buf );
+  // glutBitmapCharacter( freetypep , 'A');
+  freetype_close(freetypep);
+  freetype_delete(freetypep);
+  
   glPopMatrix();
 }
 

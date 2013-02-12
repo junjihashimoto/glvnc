@@ -1,7 +1,7 @@
 #export WIN32 := 1
 #export MINGW32 := 1
 #export PREFIX:=i586-mingw32msvc-
-#export DEBUG := 1
+export DEBUG := 1
 
 export PREFIX:=
 

@@ -149,7 +149,6 @@ display(void){
   // Square(mousedat.x-1,mousedat.y-10,
   // 	 mousedat.x+1,mousedat.y+10);
 
-  
   glPushMatrix();
   {
 
@@ -191,6 +190,7 @@ display(void){
     }
     glPopMatrix();
   }
+  
   //  display_fps();
 
   glutSwapBuffers();

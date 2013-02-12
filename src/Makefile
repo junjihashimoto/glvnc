@@ -26,10 +26,12 @@ CFLAGS+=-I../libs/freeglut -DFREEGLUT_STATIC
 CFLAGS+=-I../libs/thread
 CFLAGS+=-I../libs/vnc
 CFLAGS+=-I../libs/glui
+CFLAGS+=-I../libs/freetype_util
 
 OTHER_LIBS=  ../libs/freeglut/libglut.a
 OTHER_LIBS+= ../libs/glui/libglui.a
 OTHER_LIBS+= ../libs/vnc/libvnc.a
+OTHER_LIBS+= ../libs/freetype_util/libfreetype_util.a
 
 ifdef WIN32
 OTHER_LIBS+= ../libs/libjpeg/libjpeg.a

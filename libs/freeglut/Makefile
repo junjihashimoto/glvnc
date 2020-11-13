@@ -68,7 +68,6 @@ OPT  = $(CFLAGS) -I. -Iinternal  \
 -DFREEGLUT_STATIC
 endif
 
-OPT+= -I../freetype_util
 
 OBJ   = $(patsubst %.c, %.o  , $(LIBSRC) ) 
 

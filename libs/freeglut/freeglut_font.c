@@ -27,7 +27,6 @@
 
 #include <GL/freeglut.h>
 #include "freeglut_internal.h"
-#include "freetype_util.h"
 
 /*
  * TODO BEFORE THE STABLE RELEASE:
@@ -47,7 +46,6 @@ extern SFG_Font fgFontHelvetica12;
 extern SFG_Font fgFontHelvetica18;
 extern SFG_Font fgFontTimesRoman10;
 extern SFG_Font fgFontTimesRoman24;
-extern SFG_Font fgFontFreeType;
 extern SFG_StrokeFont fgStrokeRoman;
 extern SFG_StrokeFont fgStrokeMonoRoman;
 
@@ -74,13 +72,7 @@ static SFG_Font* fghFontByID( void* font )
         return &fgFontTimesRoman10;
     if( font == GLUT_BITMAP_TIMES_ROMAN_24 )
         return &fgFontTimesRoman24;
-    //    return &fgFontFreeType;
 
-    int* p=(int*)font;
-    if(*p==0x12345678){
-      return &fgFontFreeType;
-    }
-    
     fgWarning( "font 0x%08x not found", font );
     return 0;
 }
@@ -112,17 +104,13 @@ void FGAPIENTRY glutBitmapCharacter( void* fontID, int character )
     SFG_Font* font;
     FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutBitmapCharacter" );
     font = fghFontByID( fontID );
-    if(font!=&fgFontFreeType){
-      freeglut_return_if_fail( ( character >= 1 )&&( character < 256 ) );
-      freeglut_return_if_fail( font );
-    }
+    freeglut_return_if_fail( ( character >= 1 )&&( character < 256 ) );
+    freeglut_return_if_fail( font );
 
     /*
      * Find the character we want to draw (???)
      */
-    if(font!=&fgFontFreeType){
-       face = font->Characters[ character ];
-    }
+    face = font->Characters[ character ];
 
     glPushClientAttrib( GL_CLIENT_PIXEL_STORE_BIT );
     glPixelStorei( GL_UNPACK_SWAP_BYTES,  GL_FALSE );
@@ -131,50 +119,12 @@ void FGAPIENTRY glutBitmapCharacter( void* fontID, int character )
     glPixelStorei( GL_UNPACK_SKIP_ROWS,   0        );
     glPixelStorei( GL_UNPACK_SKIP_PIXELS, 0        );
     glPixelStorei( GL_UNPACK_ALIGNMENT,   1        );
-    if(font!=&fgFontFreeType){
-      glBitmap(
-	       face[ 0 ], font->Height,      /* The bitmap's width and height  */
-	       font->xorig, font->yorig,     /* The origin in the font glyph   */
-	       ( float )( face[ 0 ] ), 0.0,  /* The raster advance -- inc. x,y */
-	       ( face + 1 )                  /* The packed bitmap data...      */
-	       );
-    }else{
-      unsigned char* p=freetype_get(fontID,character);
-      int w=freetype_get_width(fontID);
-      int h=freetype_get_height(fontID);
-      int ox=freetype_get_origin_x(fontID);
-      int oy=freetype_get_origin_y(fontID);
-      if(1){
-	int pack=((w+7)/8);
-	unsigned char* buf=(unsigned char*)malloc(pack*h);
-	int x,y;
-	memset(buf,0,pack*h);
-	for(y=0;y<h;y++)
-	  for(x=0;x<w;x++)
-	  buf[(h-1-y)*pack+x/8]|=(p[(y*w+x)*3]>128?1:0)<<(7-x%8);
-	glBitmap(
-		 w,h,      /* The bitmap's width and height  */
-		 ox,oy,     /* The origin in the font glyph   */
-		 ( float )( w ), 0.0,  /* The raster advance -- inc. x,y */
-		 ( buf )                  /* The packed bitmap data...      */
-		 );
-	free(buf);
-      }else{
-	unsigned char* buf=(unsigned char*)malloc(w*h*2);
-	int y,x;
-	memset(buf,0,w*h);
-	for(y=0;y<h;y++)
-	  for(x=0;x<w;x++){
-	    buf[(w*y+x)*2]=p[(y*w+x)*3];
-	    if(p[(y*w+x)*3]>64)
-	      buf[(w*y+x)*2+1]=255;
-	    else
-	      buf[(w*y+x)*2+1]=0;
-	  }
-	glDrawPixels(w,h,GL_LUMINANCE_ALPHA,GL_UNSIGNED_BYTE,buf);
-	free(buf);
-      }
-    }
+    glBitmap(
+        face[ 0 ], font->Height,      /* The bitmap's width and height  */
+        font->xorig, font->yorig,     /* The origin in the font glyph   */
+        ( float )( face[ 0 ] ), 0.0,  /* The raster advance -- inc. x,y */
+        ( face + 1 )                  /* The packed bitmap data...      */
+    );
     glPopClientAttrib( );
 }
 
@@ -185,8 +135,7 @@ void FGAPIENTRY glutBitmapString( void* fontID, const unsigned char *string )
     SFG_Font* font;
     FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutBitmapString" );
     font = fghFontByID( fontID );
-    if(font)
-      freeglut_return_if_fail( font );
+    freeglut_return_if_fail( font );
     if ( !string || ! *string )
         return;
 
@@ -203,64 +152,25 @@ void FGAPIENTRY glutBitmapString( void* fontID, const unsigned char *string )
      * A newline will simply translate the next character's insertion
      * point back to the start of the line and down one line.
      */
-    if(font!=&fgFontFreeType){
-      while( ( c = *string++) )
+    while( ( c = *string++) )
         if( c == '\n' )
-	  {
+        {
             glBitmap ( 0, 0, 0, 0, -x, (float) -font->Height, NULL );
             x = 0.0f;
-	  }
+        }
         else  /* Not an EOL, draw the bitmap character */
-	  {
+        {
             const GLubyte* face = font->Characters[ c ];
 
             glBitmap(
-		     face[ 0 ], font->Height,     /* Bitmap's width and height    */
-		     font->xorig, font->yorig,    /* The origin in the font glyph */
-		     ( float )( face[ 0 ] ), 0.0, /* The raster advance; inc. x,y */
-		     ( face + 1 )                 /* The packed bitmap data...    */
-		     );
+                face[ 0 ], font->Height,     /* Bitmap's width and height    */
+                font->xorig, font->yorig,    /* The origin in the font glyph */
+                ( float )( face[ 0 ] ), 0.0, /* The raster advance; inc. x,y */
+                ( face + 1 )                 /* The packed bitmap data...    */
+            );
 
             x += ( float )( face[ 0 ] );
-	  }
-    }else{
-      unsigned char* p=freetype_getstring(fontID,string);
-      int w=freetype_get_width(fontID);
-      int h=freetype_get_height(fontID);
-      int ox=freetype_get_origin_x(fontID);
-      int oy=freetype_get_origin_y(fontID);
-      
-      if(1){
-	int pack=((w+7)/8);
-	unsigned char* buf=(unsigned char*)malloc(pack*h);
-	int x,y;
-	memset(buf,0,pack*h);
-	for(y=0;y<h;y++)
-	  for(x=0;x<w;x++)
-	    buf[(h-1-y)*pack+x/8]|=(p[(y*w+x)*3]>128?1:0)<<(7-x%8);
-	glBitmap(
-		 w,h,      /* The bitmap's width and height  */
-		 ox,oy,     /* The origin in the font glyph   */
-		 ( float )( w ), 0.0,  /* The raster advance -- inc. x,y */
-		 ( buf )                  /* The packed bitmap data...      */
-		 );
-	free(buf);
-      }else{
-	unsigned char* buf=(unsigned char*)malloc(w*h*2);
-	int y,x;
-	memset(buf,0,w*h);
-	for(y=0;y<h;y++)
-	  for(x=0;x<w;x++){
-	    buf[(w*y+x)*2]=p[(y*w+x)*3];
-	    if(p[(y*w+x)*3]>64)
-	      buf[(w*y+x)*2+1]=255;
-	    else
-	      buf[(w*y+x)*2+1]=0;
-	  }
-	glDrawPixels(w,h,GL_LUMINANCE_ALPHA,GL_UNSIGNED_BYTE,buf);
-	free(buf);
-      }
-    }
+        }
 
     glPopClientAttrib( );
 }
@@ -273,15 +183,9 @@ int FGAPIENTRY glutBitmapWidth( void* fontID, int character )
     SFG_Font* font;
     FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutBitmapWidth" );
     font = fghFontByID( fontID );
+    freeglut_return_val_if_fail( character > 0 && character < 256, 0 );
     freeglut_return_val_if_fail( font, 0 );
-    if(font!=&fgFontFreeType){
-      freeglut_return_val_if_fail( character > 0 && character < 256, 0 );
-      return *( font->Characters[ character ] );
-    }else{
-      freetype_get(fontID,character);
-      int w=freetype_get_width(fontID);
-      return w;
-    }
+    return *( font->Characters[ character ] );
 }
 
 /*
@@ -295,30 +199,24 @@ int FGAPIENTRY glutBitmapLength( void* fontID, const unsigned char* string )
     FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutBitmapLength" );
     font = fghFontByID( fontID );
     freeglut_return_val_if_fail( font, 0 );
-    if(font!=&fgFontFreeType){
-      if ( !string || ! *string )
+    if ( !string || ! *string )
         return 0;
 
-      while( ( c = *string++) )
-	{
-	  if( c != '\n' )/* Not an EOL, increment length of line */
+    while( ( c = *string++) )
+    {
+        if( c != '\n' )/* Not an EOL, increment length of line */
             this_line_length += *( font->Characters[ c ]);
-	  else  /* EOL; reset the length of this line */
-	    {
-	      if( length < this_line_length )
+        else  /* EOL; reset the length of this line */
+        {
+            if( length < this_line_length )
                 length = this_line_length;
-	      this_line_length = 0;
-	    }
-	}
-      if ( length < this_line_length )
+            this_line_length = 0;
+        }
+    }
+    if ( length < this_line_length )
         length = this_line_length;
 
-      return length;
-    }else{
-      freetype_getstring(fontID,string);
-      int w=freetype_get_width(fontID);
-      return w;
-    }
+    return length;
 }
 
 /*
@@ -330,15 +228,7 @@ int FGAPIENTRY glutBitmapHeight( void* fontID )
     FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutBitmapHeight" );
     font = fghFontByID( fontID );
     freeglut_return_val_if_fail( font, 0 );
-    
-    if(font!=&fgFontFreeType){
-      return font->Height;
-    }else{
-      unsigned char* p=freetype_get(fontID,'A');
-      int w=freetype_get_width(fontID);
-      int h=freetype_get_height(fontID);
-      return h;
-    }
+    return font->Height;
 }
 
 /*

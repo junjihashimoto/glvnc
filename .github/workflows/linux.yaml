@@ -1,0 +1,22 @@
+name: linux
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup packages
+      run: |
+        sudo apt update -qq
+        sudo apt -y --allow-downgrades --allow-remove-essential --allow-change-held-packages install \
+          build-essential make libx11-dev
+    - name: Build
+      run: |
+        ln -s Makefile.linux Makefile.common
+        make -j2
+    - uses: actions/upload-artifact@v2
+      with:
+        name: binary
+        path: src/bin/glvnc

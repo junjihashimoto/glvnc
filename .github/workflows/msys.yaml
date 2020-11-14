@@ -1,0 +1,22 @@
+name: msys
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup packages
+      run: |
+        sudo apt update -qq
+        sudo apt -y --allow-downgrades --allow-remove-essential --allow-change-held-packages install \
+          build-essential make mingw-64
+    - name: Build
+      run: |
+        ln -s Makefile.msys Makefile.common
+        make -j2
+    - uses: actions/upload-artifact@v2
+      with:
+        name: binary
+        path: src/bin/glvnc.exe

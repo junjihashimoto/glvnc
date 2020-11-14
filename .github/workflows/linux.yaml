@@ -11,7 +11,7 @@ jobs:
       run: |
         sudo apt update -qq
         sudo apt -y --allow-downgrades --allow-remove-essential --allow-change-held-packages install \
-          build-essential make libx11-dev
+          build-essential make libx11-dev libgl-dev
     - name: Build
       run: |
         ln -s Makefile.linux Makefile.common

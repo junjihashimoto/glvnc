@@ -11,7 +11,7 @@ jobs:
       run: |
         sudo apt update -qq
         sudo apt -y --allow-downgrades --allow-remove-essential --allow-change-held-packages install \
-          build-essential make mingw-64
+          build-essential make mingw-w64
     - name: Build
       run: |
         ln -s Makefile.msys Makefile.common

@@ -231,9 +231,8 @@ typedef unsigned int JDIMENSION;
  * specific header files that you want to include together with these files.
  * Defining HAVE_BOOLEAN before including jpeglib.h should make it work.
  */
-
 #ifndef HAVE_BOOLEAN
-typedef int boolean;
+#define boolean int
 #endif
 #ifndef FALSE			/* in case these macros already exist */
 #define FALSE	0		/* values of boolean */

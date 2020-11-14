@@ -1,28 +1,9 @@
-#export WIN32 := 1
-#export MINGW32 := 1
-#export PREFIX:=i586-mingw32msvc-
-#export DEBUG := 1
-
-export PREFIX:=
-
 OS=$(shell uname -o)
-ifeq ($(OS),GNU/Linux)
-ifdef WIN32
-export PREFIX:=i586-mingw32msvc-
-export MINGW32:=1
-endif
-endif
-
-ifeq ($(OS),Msys)
-export WIN32:=1
-export MINGW32:= 1
-endif
-
-ifeq ($(OS),Cygwin)
-export WIN32:=1
-export CYGWIN:=1
-export MINGW32:= 1
-endif
+export OS := Msys 
+export WIN32 := 1
+export MINGW32 := 1
+export PREFIX:=x86_64-w64-mingw32-
+export DEBUG := 1
 
 
 WARN_OPT= \

@@ -86,7 +86,6 @@ typedef JCOEF FAR *JCOEFPTR;	/* useful in a couple of places */
 
 
 /* DCT coefficient quantization tables. */
-
 typedef struct {
   /* This array gives the coefficient quantizers in natural array order
    * (not the zigzag order in which they are stored in a JPEG DQT marker).

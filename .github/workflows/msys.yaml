@@ -14,7 +14,7 @@ jobs:
           build-essential make mingw-w64
     - name: Build
       run: |
-        ln -s Makefile.msys Makefile.common
+        cp Makefile.msys Makefile.common
         make -j2
     - uses: actions/upload-artifact@v2
       with:

@@ -14,7 +14,7 @@ jobs:
           build-essential make libx11-dev libgl-dev libglu-dev
     - name: Build
       run: |
-        ln -s Makefile.linux Makefile.common
+        cp Makefile.linux Makefile.common
         make -j2
     - uses: actions/upload-artifact@v2
       with:

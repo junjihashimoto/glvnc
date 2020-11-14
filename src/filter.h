@@ -1,4 +1,4 @@
-#ifndef WIN32
+#ifdef USE_OPENCV
 #include <bmp.h>
 
 

@@ -37,9 +37,11 @@ OTHER_LIBS+= -lopengl32 -lglu32 -lwinmm -lgdi32 -lws2_32 -lshell32 -lm
 CFLAGS+=-I../libs/libjpeg -I../libs/libpng -I../libs/zlib
 
 else
-OTHER_LIBS+= -lGL -lGLU -lm -ldl -lXrandr -lXxf86vm
-OTHER_LIBS+= -llapack  -latlas -lblas -lgfortran
-OTHER_LIBS+= -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect -lopencv_video
+OTHER_LIBS+= ../libs/libjpeg/libjpeg.a
+OTHER_LIBS+= ../libs/libpng/libpng.a
+OTHER_LIBS+= ../libs/zlib/libz.a
+OTHER_LIBS+= -lGL -lGLU -lm -ldl -lXrandr -lXxf86vm -lX11
+CFLAGS+=-I../libs/libjpeg -I../libs/libpng -I../libs/zlib
 endif
 
 

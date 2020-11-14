@@ -14,9 +14,10 @@ jobs:
           build-essential make mingw-w64
     - name: Build
       run: |
+        ls
         cp Makefile.msys Makefile.common
-        make -j2
+        make
     - uses: actions/upload-artifact@v2
       with:
-        name: binary
+        name: glvnc
         path: src/bin/glvnc.exe

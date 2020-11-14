@@ -11,13 +11,9 @@ thread \
 utils
 
 
-ifndef WIN32
-#SUBDIRS+=matrix
-else
 SUBDIRS+=libjpeg
 SUBDIRS+=libpng
 SUBDIRS+=zlib
-endif
 
 
 

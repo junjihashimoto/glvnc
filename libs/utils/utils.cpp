@@ -18,6 +18,7 @@ extern "C"{
 #include <signal.h>
 #include <iconv.h>
 #include <errno.h>
+#include <unistd.h>
 #endif
   
 #include <sys/stat.h>

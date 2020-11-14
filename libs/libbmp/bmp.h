@@ -13,7 +13,7 @@
 extern "C"{
 #ifndef WIN32
 #include <unistd.h>
-#endif  
+#endif
 #include <png.h>
 #include <jpeglib.h>
   
@@ -435,7 +435,7 @@ Bitmap<T,COLOR>::readPng(const char* file){
   png_read_info(png_ptr, info_ptr);
 
   
-  init((int)info_ptr->width,(int)info_ptr->height);
+  init((int)(info_ptr->width),(int)(info_ptr->height));
   int color_type = info_ptr->color_type;
   int bit_depth  = info_ptr->bit_depth;
 
@@ -456,7 +456,7 @@ Bitmap<T,COLOR>::readPng(const char* file){
     abort();
   }
 
-  int    r  = (int)info_ptr->rowbytes;
+  int    r  = (int)(info_ptr->rowbytes);
   int    hs = (int)sizeof(png_bytep)  * h;
   int    ts = r * h;
   unsigned char*  t  = (unsigned char*) malloc(hs+ts);

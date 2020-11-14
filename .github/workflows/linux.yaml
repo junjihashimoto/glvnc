@@ -11,12 +11,12 @@ jobs:
       run: |
         sudo apt update -qq
         sudo apt -y --allow-downgrades --allow-remove-essential --allow-change-held-packages install \
-          build-essential make libx11-dev libgl-dev libglu-dev
+          build-essential make libx11-dev libgl-dev libglu-dev libxxf86vm-dev libxrandr-dev libxi-dev
     - name: Build
       run: |
         cp Makefile.linux Makefile.common
-        make -j2
+        make
     - uses: actions/upload-artifact@v2
       with:
-        name: binary
+        name: glvnc
         path: src/bin/glvnc

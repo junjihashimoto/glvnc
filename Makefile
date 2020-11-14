@@ -2,8 +2,6 @@ include ./Makefile.common
 
 SUBDIRS= \
 libs \
-mousemove \
-cliprun \
 src
 
 

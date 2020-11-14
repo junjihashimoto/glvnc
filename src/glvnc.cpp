@@ -324,7 +324,7 @@ img_filter(VNC_Client* vncp,const BMP4b& in,BMP4b& out){
   update=1;
   if(vnc_mode==0)
     memset((unsigned char*)out.rgb,0,4*out.w*out.h);
-#ifndef WIN32
+#ifdef USE_OPENCV
   else if(vnc_mode==1)
     houghlines(in,out);
   else if(vnc_mode==2)

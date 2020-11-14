@@ -126,6 +126,4 @@ struct MouseDat{
   }
 };
 
-
-
 #endif

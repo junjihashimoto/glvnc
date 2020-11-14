@@ -550,6 +550,10 @@ reshape(int w,int h){
   vnc.set_key(0xffe9,0);
 }
 
+void focus(){
+  printf("focus in\n");
+}
+
 int
 main(int argc, char *argv[]){
   // Camera cam;

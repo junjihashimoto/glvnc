@@ -2620,6 +2620,16 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
             INVOKE_WCB( *window, Keyboard,
                         ( 127, window->State.MouseX, window->State.MouseY )
 			);
+	    break;
+	  case VK_OEM_2:
+	  case VK_OEM_102:
+	    //	    printf("OEM:%d\n",fgState.Modifiers);
+	    if(fgState.Modifiers == (GLUT_ACTIVE_CTRL | GLUT_ACTIVE_SHIFT)){
+	      INVOKE_WCB( *window, Keyboard,
+			  ( (char)'_', window->State.MouseX, window->State.MouseY )
+			  );
+	      break;
+	    }
 	  }
 
 #if defined(_WIN32_WCE)
@@ -2644,6 +2654,7 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 	  }
 #endif
 
+	//	printf("key press0:%d:%d\n",keypress,wParam);
         if( keypress != -1 )
 	  INVOKE_WCB( *window, Special,
 		      ( keypress,
@@ -2713,7 +2724,14 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 			( 127, window->State.MouseX, window->State.MouseY )
 			);
 	    break;
-
+	  case VK_OEM_2:
+	  case VK_OEM_102:
+	    if(fgState.Modifiers == (GLUT_ACTIVE_CTRL | GLUT_ACTIVE_SHIFT)){
+	      INVOKE_WCB( *window, KeyboardUp,
+			  ( (char)'_', window->State.MouseX, window->State.MouseY )
+			  );
+	      break;
+	    }
 	  default:
 	    {
 #if !defined(_WIN32_WCE)
@@ -2732,6 +2750,7 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 #endif /* !defined(_WIN32_WCE) */
 	    }
 	  }
+	//	printf("key press:%d:%d\n",keypress,wParam);
 
         if( keypress != -1 )
 	  INVOKE_WCB( *window, SpecialUp,
@@ -2746,6 +2765,7 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
     case WM_SYSCHAR:
     case WM_CHAR:
       {
+	//	printf("wm char:%d\n",(int)wParam);
 	if( (fgState.KeyRepeat==GLUT_KEY_REPEAT_OFF || window->State.IgnoreKeyRepeat==GL_TRUE) && (HIWORD(lParam) & KF_REPEAT) )
 	  break;
 

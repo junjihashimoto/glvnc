@@ -48,8 +48,7 @@ endif
 
 LIBS:=\
 ../libs/thread/libthread.a \
-../libs/utils/libutils.a \
--static
+../libs/utils/libutils.a
 
 ifdef WIN32
 

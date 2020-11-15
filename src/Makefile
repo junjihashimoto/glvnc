@@ -33,7 +33,7 @@ ifdef WIN32
 OTHER_LIBS+= ../libs/libjpeg/libjpeg.a
 OTHER_LIBS+= ../libs/libpng/libpng.a
 OTHER_LIBS+= ../libs/zlib/libz.a
-OTHER_LIBS+= -lopengl32 -lglu32 -lwinmm -lgdi32 -lws2_32 -lshell32 -lm
+OTHER_LIBS+= -lopengl32 -lglu32 -lwinmm -lgdi32 -lws2_32 -lshell32 -lm -static
 CFLAGS+=-I../libs/libjpeg -I../libs/libpng -I../libs/zlib
 
 else
@@ -46,7 +46,7 @@ endif
 
 
 
-all: objs progs
+all: progs
 
 objs:$(OBJS)
 
@@ -62,7 +62,7 @@ obj/%.o:%.cpp $(HEADERS)
 	$(CXX) -c -o $@ $< $(CFLAGS)
 
 
-bin/%$(EXE):obj/%.o $(LIBS) $(NPROG)
+bin/glvnc$(EXE):obj/glvnc.o $(LIBS) $(NPROG)
 	-if [ ! -d bin ] ; then mkdir bin ;fi
 	$(CXX) -o $@ $<  $(CFLAGS) $(NPROG) $(LIBS) $(OTHER_LIBS)
 #	cp ../bin/template ../$@

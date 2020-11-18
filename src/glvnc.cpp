@@ -8,8 +8,8 @@ extern void get_cuttext(VNC_Client* vncp,const string& cuttext);
 
 using namespace std;
 
-#define INIT_WIDTH  640
-#define INIT_HEIGHT 480
+#define INIT_WIDTH  1024
+#define INIT_HEIGHT 768
 int WIDTH=INIT_WIDTH; 
 int HEIGHT=INIT_HEIGHT;
 int pre_width;
@@ -228,12 +228,13 @@ int super_toggle=0;
 
 void 
 vnckey(unsigned char key,int updown){
-  switch (key) {
-  case 0x28:
-    key='\\';
-    break;
-  }
-  //printf("key:%d\n",(int)key);
+  //printf("key0:%d\n",(int)key);
+  // switch (key) {
+  // case 0x28:
+  //   key='\\';
+  //   break;
+  // }
+  //printf("key1:%d\n",(int)key);
     
   if(ctrl_key){
     if(updown){
@@ -242,6 +243,12 @@ vnckey(unsigned char key,int updown){
       case '_':
 	vnc.set_key(0x5f,1);
 	break;
+      case ' ':
+	vnc.set_key(0x20,1);
+	break;
+      // case '(':
+      // 	vnc.set_key(0x5b,1);
+      // 	break;
       default:
 	vnc.set_key(0x60+key,1);
       }
@@ -250,6 +257,12 @@ vnckey(unsigned char key,int updown){
       case '_':
 	vnc.set_key(0x5f,0);
 	break;
+      case ' ':
+	vnc.set_key(0x20,0);
+	break;
+      // case '(':
+      // 	vnc.set_key(0x5b,0);
+      // 	break;
       default:
 	vnc.set_key(0x60+key,0);
       }
@@ -266,6 +279,12 @@ vnckey(unsigned char key,int updown){
     case 0x7f://del
       vnc.set_key(0xffff,updown);
       break;
+    case 0x20://space
+      vnc.set_key(0x20,updown);
+      break;
+    // case 0x28://(
+    //   vnc.set_key(0x5b,updown);
+    //   break;
     default:
       vnc.set_key(key,updown);
     }
@@ -354,12 +373,12 @@ img_filter(VNC_Client* vncp,const BMP4b& in,BMP4b& out){
 
 void
 set_modifiers(){
-  int shift=glutGetModifiers() & GLUT_ACTIVE_SHIFT;
-  int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL;
-  int alt  =glutGetModifiers() & GLUT_ACTIVE_ALT;
-  vnc.set_key(0xffe3,ctrl);
-  vnc.set_key(0xffe9,alt);
-  vnc.set_key(0xffe1,shift);
+  // int shift=glutGetModifiers() & GLUT_ACTIVE_SHIFT;
+  // int ctrl =glutGetModifiers() & GLUT_ACTIVE_CTRL;
+  // int alt  =glutGetModifiers() & GLUT_ACTIVE_ALT;
+  // vnc.set_key(0xffe3,ctrl);
+  // vnc.set_key(0xffe9,alt);
+  // vnc.set_key(0xffe1,shift);
 }
 
 void
@@ -571,7 +590,7 @@ reshape(int w,int h){
 }
 
 void focus(){
-  printf("focus in\n");
+  //  printf("focus in\n");
 }
 
 int

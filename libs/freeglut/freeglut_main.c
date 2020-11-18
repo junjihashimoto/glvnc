@@ -2654,7 +2654,7 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
 	  }
 #endif
 
-	//	printf("key press0:%d:%d\n",keypress,wParam);
+	//printf("key press0:%d:%d\n",keypress,wParam);
         if( keypress != -1 )
 	  INVOKE_WCB( *window, Special,
 		      ( keypress,
@@ -2765,7 +2765,7 @@ LRESULT CALLBACK fgWindowProc( HWND hWnd, UINT uMsg, WPARAM wParam,
     case WM_SYSCHAR:
     case WM_CHAR:
       {
-	//	printf("wm char:%d\n",(int)wParam);
+	//printf("wm char:%d\n",(int)wParam);
 	if( (fgState.KeyRepeat==GLUT_KEY_REPEAT_OFF || window->State.IgnoreKeyRepeat==GL_TRUE) && (HIWORD(lParam) & KF_REPEAT) )
 	  break;
 

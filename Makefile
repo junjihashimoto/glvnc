@@ -21,3 +21,7 @@ clean:
 	for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir clean; \
 	done
+
+install:
+	install -d $(DESTDIR)/bin
+	install src/bin/glvnc $(DESTDIR)/bin/
